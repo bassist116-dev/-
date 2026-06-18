@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="夏海秘書">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
-<title>夏海秘書アプリ Ver4</title>
+<title>夏海秘書アプリ Ver4.1</title>
 <style>
 :root{--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--main:#2563eb;--line:#e2e8f0;--danger:#dc2626;--ok:#16a34a;--warn:#f59e0b;--dark:#0f172a}
 *{box-sizing:border-box}
@@ -46,7 +46,7 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 </style>
 </head>
 <body>
-<header><h1>夏海秘書アプリ Ver4</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
+<header><h1>夏海秘書アプリ Ver4.1</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
 <main>
 <section id="home" class="view active">
  <div class="card"><h2>表示月</h2><div class="row"><select id="year"></select><select id="month"></select><button class="primary" onclick="renderAll()">更新</button><button class="ghost" onclick="jumpToday()">今月</button></div></div>
@@ -60,7 +60,7 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 <section id="regular" class="view">
  <div class="card search"><h2>委員会・定例</h2><input id="regularSearch" placeholder="検索" oninput="renderRegular()"></div>
  <div class="card"><div id="regularList"></div></div>
- <div class="card">
+ <div class="card" id="regularFormCard">
   <h2>定例を追加・編集</h2>
   <input type="hidden" id="editId">
   <label>名称</label><input id="name" autocomplete="off">
@@ -77,7 +77,7 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 
 <section id="single" class="view">
  <div class="card"><h2>研修・単発予定</h2><div id="singleList"></div></div>
- <div class="card">
+ <div class="card" id="singleFormCard">
   <h2>単発予定を追加・編集</h2><input type="hidden" id="singleEditId">
   <label>日付</label><input id="singleDate" type="date">
   <label>名称</label><input id="singleName">
@@ -91,7 +91,7 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 
 <section id="tasks" class="view">
  <div class="card"><h2>タスク一覧</h2><div class="row"><select id="taskFilter" onchange="renderTasks()"><option value="open">未完了</option><option value="all">全て</option><option value="done">完了</option></select><select id="taskCommitteeFilter" onchange="renderTasks()"></select></div><div id="taskList"></div></div>
- <div class="card"><h2>タスク追加・編集</h2><input type="hidden" id="taskEditId"><label>内容</label><input id="taskTitle" placeholder="例：処方カレンダー確認"><label>関連委員会</label><select id="taskCommittee"></select><div class="row"><div style="flex:1"><label>期限</label><input id="taskDue" type="date"></div><div style="flex:1"><label>優先度</label><select id="taskPriority"><option>S</option><option>A</option><option>B</option><option>C</option></select></div></div><label>状態</label><select id="taskStatus"><option>未着手</option><option>進行中</option><option>完了</option></select><label>メモ</label><textarea id="taskMemo"></textarea><div class="actions"><button class="primary" onclick="saveTask()">保存</button><button class="ghost" onclick="clearTask()">クリア</button></div></div>
+ <div class="card" id="taskFormCard"><h2>タスク追加・編集</h2><input type="hidden" id="taskEditId"><label>内容</label><input id="taskTitle" placeholder="例：処方カレンダー確認"><label>関連委員会</label><select id="taskCommittee"></select><div class="row"><div style="flex:1"><label>期限</label><input id="taskDue" type="date"></div><div style="flex:1"><label>優先度</label><select id="taskPriority"><option>S</option><option>A</option><option>B</option><option>C</option></select></div></div><label>状態</label><select id="taskStatus"><option>未着手</option><option>進行中</option><option>完了</option></select><label>メモ</label><textarea id="taskMemo"></textarea><div class="actions"><button class="primary" onclick="saveTask()">保存</button><button class="ghost" onclick="clearTask()">クリア</button></div></div>
 </section>
 
 <section id="minutes" class="view">
@@ -108,7 +108,7 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 <nav class="tabs"><button class="active" onclick="showView('home',this)">予定</button><button onclick="showView('regular',this)">委員会</button><button onclick="showView('single',this)">研修</button><button onclick="showView('tasks',this)">宿題</button><button onclick="showView('minutes',this)">議事録</button><button onclick="showView('ocr',this)">取込</button></nav>
 
 <script>
-const APP_VERSION="4.0";
+const APP_VERSION="4.1";
 function uid(){return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())}
 const defaultData=[
 {id:uid(),name:"特定行為に関する検討委員会",type:"委員会",week:2,dow:2,time:"16:00",end:"",memo:"5月以降",monthPattern:"all",months:[]},
