@@ -3,46 +3,54 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#0f172a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="委員会管理">
+<meta name="apple-mobile-web-app-title" content="夏海秘書">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
-<title>委員会管理</title>
+<title>夏海秘書アプリ Ver3</title>
 <style>
-:root{--bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;--main:#2563eb;--line:#e5e7eb}
+:root{
+  --bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--main:#2563eb;
+  --line:#e2e8f0;--danger:#dc2626;--ok:#16a34a;--warn:#f59e0b;--dark:#0f172a;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-header{position:sticky;top:0;z-index:5;background:#111827;color:white;padding:14px 16px calc(12px + env(safe-area-inset-top));box-shadow:0 2px 10px #0003}
-h1{font-size:20px;margin:0}.sub{font-size:12px;color:#d1d5db;margin-top:3px}
-main{padding:12px;max-width:720px;margin:auto;padding-bottom:80px}
-.card{background:var(--card);border-radius:16px;padding:14px;margin:0 0 12px;box-shadow:0 2px 10px #0001}
-h2{font-size:17px;margin:0 0 10px}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:10;background:var(--dark);color:white;padding:14px 16px calc(12px + env(safe-area-inset-top));box-shadow:0 2px 12px #0003}
+h1{font-size:20px;margin:0;font-weight:900}.sub{font-size:12px;color:#cbd5e1;margin-top:4px}
+main{padding:12px;max-width:880px;margin:auto;padding-bottom:96px}
+.card{background:var(--card);border-radius:18px;padding:14px;margin:0 0 12px;box-shadow:0 3px 14px #0000000d;border:1px solid #eef2f7}
+h2{font-size:17px;margin:0 0 10px;font-weight:900}
 h3{font-size:15px;margin:14px 0 8px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;background:white}
-label{display:block;font-size:12px;color:#374151;margin:10px 0 4px}
-textarea{min-height:96px}
-button{border:0;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px}
-.primary{background:var(--main);color:#fff}.ghost{background:#e5e7eb}.danger{background:#dc2626;color:#fff}.ok{background:#16a34a;color:#fff}
-.tabs{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:10}
-.tabs button{border-radius:0;background:white;color:#374151;padding:10px 2px;font-size:12px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px;background:white}
+label{display:block;font-size:12px;color:#475569;margin:10px 0 4px;font-weight:700}
+textarea{min-height:98px}
+button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:14px;cursor:pointer}
+.primary{background:var(--main);color:#fff}.ghost{background:#e2e8f0;color:#0f172a}.danger{background:#dc2626;color:#fff}.ok{background:#16a34a;color:#fff}.warnbtn{background:#f59e0b;color:#111827}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:20}
+.tabs button{border-radius:0;background:white;color:#475569;padding:10px 2px;font-size:11px}
 .tabs button.active{color:#2563eb;background:#eff6ff}
 .view{display:none}.view.active{display:block}
-.event{border:1px solid var(--line);border-radius:14px;padding:11px;margin:8px 0;background:#fff}
-.event .date{font-weight:800}.event .meta{color:var(--muted);font-size:13px;margin-top:2px}
-.tag{display:inline-block;border-radius:999px;padding:2px 8px;font-size:12px;background:#eef2ff;color:#3730a3;margin-right:4px}
+.event,.task,.minute{border:1px solid var(--line);border-radius:15px;padding:12px;margin:8px 0;background:#fff}
+.event .date{font-weight:900}.meta{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.45}
+.tag{display:inline-block;border-radius:999px;padding:2px 8px;font-size:12px;background:#eef2ff;color:#3730a3;margin-right:4px;font-weight:800}
+.tagS{background:#fee2e2;color:#991b1b}.tagA{background:#ffedd5;color:#9a3412}.tagB{background:#fef9c3;color:#854d0e}.tagC{background:#dcfce7;color:#166534}
 .small{font-size:12px;color:var(--muted)}
-.warn{background:#fff7ed;border:1px solid #fed7aa;padding:10px;border-radius:12px;font-size:13px}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f9fafb}
-.actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-@media(min-width:720px){main{padding-top:18px}.tabs{max-width:720px;margin:auto;left:50%;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0}}
+.warn{background:#fff7ed;border:1px solid #fed7aa;padding:10px;border-radius:12px;font-size:13px;line-height:1.5}
+.actions{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.done{opacity:.58}.done b{text-decoration:line-through}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.kpi{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.kpi b{font-size:22px;display:block}
+.search{position:sticky;top:72px;z-index:6;background:var(--bg);padding-bottom:8px}
+.copybox{white-space:pre-wrap;background:#0f172a;color:#f8fafc;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;overflow:auto}
+hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+@media(min-width:720px){main{padding-top:18px}.tabs{max-width:880px;margin:auto;left:50%;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0}}
 </style>
 </head>
 <body>
 <header>
-  <h1>委員会管理</h1>
-  <div class="sub">PWA / オフライン対応 / 端末保存</div>
+  <h1>夏海秘書アプリ Ver3</h1>
+  <div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div>
 </header>
 
 <main>
@@ -53,7 +61,25 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;borde
       <select id="year"></select>
       <select id="month"></select>
       <button class="primary" onclick="renderAll()">更新</button>
+      <button class="ghost" onclick="jumpToday()">今月</button>
     </div>
+  </div>
+  <div class="card">
+    <h2>今日の予定</h2>
+    <div id="todayList"></div>
+  </div>
+  <div class="card">
+    <h2>今週の予定</h2>
+    <div id="weekList"></div>
+  </div>
+  <div class="card">
+    <h2>未完了タスク</h2>
+    <div class="kpis">
+      <div class="kpi"><b id="todoCount">0</b><span class="small">未完了</span></div>
+      <div class="kpi"><b id="dueSoonCount">0</b><span class="small">7日以内</span></div>
+      <div class="kpi"><b id="highCount">0</b><span class="small">S/A</span></div>
+    </div>
+    <div id="homeTasks"></div>
   </div>
   <div class="card">
     <h2>今月の予定</h2>
@@ -61,16 +87,21 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;borde
   </div>
   <div class="card">
     <h2>勤務希望候補</h2>
-    <button class="ok" onclick="copyWorkRequests()">勤務希望日をコピー</button>
+    <div class="row">
+      <button class="ok" onclick="copyWorkRequests()">勤務希望日をコピー</button>
+      <button class="ghost" onclick="renderWorkText()">テキスト表示</button>
+    </div>
+    <div id="workText"></div>
     <div id="workList"></div>
   </div>
 </section>
 
 <section id="regular" class="view">
-  <div class="card">
-    <h2>定例予定</h2>
-    <div id="regularList"></div>
+  <div class="card search">
+    <h2>委員会・定例</h2>
+    <input id="regularSearch" placeholder="検索" oninput="renderRegular()">
   </div>
+  <div class="card"><div id="regularList"></div></div>
   <div class="card">
     <h2>定例を追加・編集</h2>
     <input type="hidden" id="editId">
@@ -100,6 +131,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;borde
     <label>日付</label><input id="singleDate" type="date">
     <label>名称</label><input id="singleName">
     <label>種別</label><select id="singleType"><option>研修</option><option>委員会</option><option>部会</option><option>会議</option><option>私用</option></select>
+    <label>役割</label><select id="singleRole"><option></option><option>講師</option><option>担当</option><option>ファシリテーター</option><option>受講</option></select>
     <div class="row">
       <div style="flex:1"><label>開始</label><input id="singleTime" type="time"></div>
       <div style="flex:1"><label>終了</label><input id="singleEnd" type="time"></div>
@@ -109,86 +141,178 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;borde
   </div>
 </section>
 
+<section id="tasks" class="view">
+  <div class="card">
+    <h2>タスク一覧</h2>
+    <div class="row">
+      <select id="taskFilter" onchange="renderTasks()"><option value="open">未完了</option><option value="all">全て</option><option value="done">完了</option></select>
+      <select id="taskCommitteeFilter" onchange="renderTasks()"></select>
+    </div>
+    <div id="taskList"></div>
+  </div>
+  <div class="card">
+    <h2>タスク追加・編集</h2>
+    <input type="hidden" id="taskEditId">
+    <label>内容</label><input id="taskTitle" placeholder="例：処方カレンダー確認">
+    <label>関連委員会</label><select id="taskCommittee"></select>
+    <div class="row">
+      <div style="flex:1"><label>期限</label><input id="taskDue" type="date"></div>
+      <div style="flex:1"><label>優先度</label><select id="taskPriority"><option>S</option><option>A</option><option>B</option><option>C</option></select></div>
+    </div>
+    <label>状態</label><select id="taskStatus"><option>未着手</option><option>進行中</option><option>完了</option></select>
+    <label>メモ</label><textarea id="taskMemo"></textarea>
+    <div class="actions"><button class="primary" onclick="saveTask()">保存</button><button class="ghost" onclick="clearTask()">クリア</button></div>
+  </div>
+</section>
+
+<section id="minutes" class="view">
+  <div class="card">
+    <h2>議事録</h2>
+    <div id="minutesList"></div>
+  </div>
+  <div class="card">
+    <h2>議事録追加</h2>
+    <label>対象</label><select id="minuteTarget"></select>
+    <label>開催日</label><input id="minuteDate" type="date">
+    <label>決定事項・内容</label><textarea id="minuteText" placeholder="議事録の要点"></textarea>
+    <label>次回までの宿題</label><textarea id="minuteActions" placeholder="1行1タスク。保存＋宿題化で自動登録"></textarea>
+    <div class="actions">
+      <button class="primary" onclick="saveMinute(false)">議事録保存</button>
+      <button class="ok" onclick="saveMinute(true)">保存＋宿題化</button>
+    </div>
+  </div>
+</section>
+
 <section id="ocr" class="view">
   <div class="card">
-    <h2>画像から予定追加</h2>
-    <div class="warn">スマホのブラウザ単体での高精度OCRは不安定なので、このPWAでは「画像を見ながらテキスト貼り付け・候補化」を基本にしています。iPhoneの写真アプリやGoogleレンズで文字コピー → ここに貼るのが実用的。</div>
+    <h2>取込</h2>
+    <div class="warn">iPhoneでは写真アプリやGoogleレンズで文字コピー → ここに貼る運用が安定。日付入りの行を候補化します。</div>
     <label>読み取ったテキスト</label>
     <textarea id="ocrText" placeholder="例：7月29日 レベル2急変時研修 担当"></textarea>
     <button class="primary" onclick="parseOCR()">候補を作成</button>
     <div id="ocrCandidates"></div>
   </div>
-</section>
-
-<section id="data" class="view">
   <div class="card">
-    <h2>バックアップ</h2>
-    <button class="primary" onclick="exportJson()">バックアップ保存</button>
-    <button class="ghost" onclick="importJson()">復元</button>
-    <p class="small">アップデート前は必ずバックアップ。新しい版を開いた後に復元すれば予定が戻る。</p>
-  </div>
-  <div class="card">
-    <h2>ホーム画面に追加</h2>
-    <p class="small">iPhone: Safariで開く → 共有 → ホーム画面に追加。Android: Chromeで開く → メニュー → ホーム画面に追加。</p>
+    <h2>保存・復元</h2>
+    <div class="actions">
+      <button class="primary" onclick="exportJson()">バックアップ保存</button>
+      <button class="ghost" onclick="importJson()">復元</button>
+      <button class="warnbtn" onclick="resetInitialData()">初期データ再投入</button>
+    </div>
+    <p class="small">アップデート前はバックアップ。新しい版で復元すればデータが戻ります。</p>
   </div>
 </section>
 </main>
 
 <nav class="tabs">
   <button class="active" onclick="showView('home',this)">予定</button>
-  <button onclick="showView('regular',this)">定例</button>
+  <button onclick="showView('regular',this)">委員会</button>
   <button onclick="showView('single',this)">研修</button>
+  <button onclick="showView('tasks',this)">宿題</button>
+  <button onclick="showView('minutes',this)">議事録</button>
   <button onclick="showView('ocr',this)">取込</button>
-  <button onclick="showView('data',this)">保存</button>
 </nav>
 
 <script>
+const APP_VERSION="3.0";
+function uid(){return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())}
 const defaultData=[
-{id:crypto.randomUUID(),name:"特定行為に関する検討委員会",type:"委員会",week:2,dow:2,time:"16:00",end:"",memo:"5月以降"},
-{id:crypto.randomUUID(),name:"リスク部会班会議（薬剤班）",type:"部会",week:2,dow:3,time:"16:00",end:"",memo:""},
-{id:crypto.randomUUID(),name:"リスクマネジメント会議",type:"会議",week:2,dow:4,time:"14:00",end:"",memo:""},
-{id:crypto.randomUUID(),name:"副師長会議",type:"会議",week:2,dow:4,time:"15:00",end:"",memo:""},
-{id:crypto.randomUUID(),name:"看護部広報委員会",type:"委員会",week:2,dow:5,time:"15:00",end:"16:00",memo:""},
-{id:crypto.randomUUID(),name:"クリニカルパス委員会",type:"委員会",week:3,dow:4,time:"15:00",end:"16:00",memo:""},
-{id:crypto.randomUUID(),name:"SNS部会",type:"部会",week:3,dow:4,time:"16:30",end:"",memo:""},
-{id:crypto.randomUUID(),name:"広報部会",type:"部会",week:4,dow:2,time:"",end:"",memo:""},
-{id:crypto.randomUUID(),name:"フットサル",type:"私用",week:4,dow:4,time:"20:00",end:"",memo:""}
+{id:uid(),name:"特定行為に関する検討委員会",type:"委員会",week:2,dow:2,time:"16:00",end:"",memo:"5月以降"},
+{id:uid(),name:"リスク部会班会議（薬剤班）",type:"部会",week:2,dow:3,time:"16:00",end:"",memo:""},
+{id:uid(),name:"リスクマネジメント会議",type:"会議",week:2,dow:4,time:"14:00",end:"",memo:""},
+{id:uid(),name:"副師長会議",type:"会議",week:2,dow:4,time:"15:00",end:"",memo:""},
+{id:uid(),name:"看護部広報委員会",type:"委員会",week:2,dow:5,time:"15:00",end:"16:00",memo:"広報委員会。広報部会とは別"},
+{id:uid(),name:"クリニカルパス委員会",type:"委員会",week:3,dow:4,time:"15:00",end:"16:00",memo:""},
+{id:uid(),name:"SNS部会",type:"部会",week:3,dow:4,time:"16:30",end:"",memo:""},
+{id:uid(),name:"広報部会",type:"部会",week:4,dow:2,time:"",end:"",memo:"看護部広報委員会とは別"},
+{id:uid(),name:"フットサル",type:"私用",week:4,dow:4,time:"20:00",end:"",memo:""}
 ];
 const defaultSingles=[
-{id:crypto.randomUUID(),date:"2026-07-29",name:"レベル2急変時研修",type:"研修",time:"",end:"",memo:"担当"},
-{id:crypto.randomUUID(),date:"2026-09-03",name:"コース研修",type:"研修",time:"",end:"",memo:"担当"},
-{id:crypto.randomUUID(),date:"2026-09-28",name:"レベル1急変時研修",type:"研修",time:"",end:"",memo:"ファシリテーター"},
-{id:crypto.randomUUID(),date:"2026-11-05",name:"レベル別急変対応コース研修",type:"研修",time:"",end:"",memo:""},
-{id:crypto.randomUUID(),date:"2026-11-16",name:"急変対応コース研修",type:"研修",time:"",end:"",memo:""},
-{id:crypto.randomUUID(),date:"2027-01-27",name:"急変対応コース研修",type:"研修",time:"",end:"",memo:""}
+{id:uid(),date:"2026-07-29",name:"レベル2急変時研修",type:"研修",role:"担当",time:"",end:"",memo:""},
+{id:uid(),date:"2026-09-03",name:"コース研修",type:"研修",role:"講師",time:"",end:"",memo:""},
+{id:uid(),date:"2026-09-24",name:"レベル別急変対応コース研修",type:"研修",role:"",time:"",end:"",memo:""},
+{id:uid(),date:"2026-09-28",name:"レベル1急変時研修",type:"研修",role:"ファシリテーター",time:"",end:"",memo:""},
+{id:uid(),date:"2026-11-05",name:"レベル別急変対応コース研修",type:"研修",role:"",time:"",end:"",memo:""},
+{id:uid(),date:"2026-11-16",name:"急変対応コース研修",type:"研修",role:"",time:"",end:"",memo:""},
+{id:uid(),date:"2027-01-27",name:"急変対応コース研修",type:"研修",role:"",time:"",end:"",memo:""}
+];
+const defaultTasks=[
+{id:uid(),title:"配薬カート廊下禁止の周知",committeeId:"",due:"",priority:"S",status:"未着手",memo:"見かけたら声かけ。病棟会・リーダー会で周知"},
+{id:uid(),title:"内服自己管理見直し",committeeId:"",due:"",priority:"A",status:"進行中",memo:"糖尿病薬・抗血栓薬・抗菌薬"},
+{id:uid(),title:"処方カレンダー導入検討",committeeId:"",due:"",priority:"B",status:"未着手",memo:"SE確認・診療部巻き込み"},
+{id:uid(),title:"急変対応研修 7/29準備",committeeId:"",due:"2026-07-29",priority:"S",status:"未着手",memo:"レベル2 急変時研修 担当"},
+{id:uid(),title:"Instagram広報投稿の進捗確認",committeeId:"",due:"",priority:"B",status:"進行中",memo:"看護部広報委員会・SNS部会"}
 ];
 let committees=JSON.parse(localStorage.getItem("committees")||"null")||defaultData;
 let singles=JSON.parse(localStorage.getItem("singles")||"null")||defaultSingles;
-function persist(){localStorage.setItem("committees",JSON.stringify(committees));localStorage.setItem("singles",JSON.stringify(singles));}
+let tasks=JSON.parse(localStorage.getItem("tasks")||"null")||defaultTasks;
+let minutes=JSON.parse(localStorage.getItem("committeeMinutes")||"[]");
+function persist(){localStorage.setItem("committees",JSON.stringify(committees));localStorage.setItem("singles",JSON.stringify(singles));localStorage.setItem("tasks",JSON.stringify(tasks));localStorage.setItem("committeeMinutes",JSON.stringify(minutes));localStorage.setItem("appVersion",APP_VERSION);}
+function resetInitialData(){if(confirm("初期データを再投入します。既存データは残して不足分だけ追加します。")){mergeDefaults();persist();renderAll();alert("再投入しました")}}
+function mergeDefaults(){
+  defaultData.forEach(d=>{if(!committees.some(c=>c.name===d.name)) committees.push({...d,id:uid()})});
+  defaultSingles.forEach(d=>{if(!singles.some(s=>s.date===d.date && s.name===d.name)) singles.push({...d,id:uid()})});
+  defaultTasks.forEach(d=>{if(!tasks.some(t=>t.title===d.title)) tasks.push({...d,id:uid()})});
+}
+function allTargets(){return [...committees.map(x=>({...x,targetType:"regular"})),...singles.map(x=>({...x,targetType:"single"}))]}
+function targetName(id){let t=allTargets().find(x=>x.id===id);return t?t.name:"未指定"}
 function showView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));btn.classList.add("active");}
 function nthDow(y,m,n,dow){let d=new Date(y,m-1,1),c=0;while(d.getMonth()==m-1){if(d.getDay()==Number(dow)){c++;if(c==Number(n))return new Date(d)}d.setDate(d.getDate()+1)}return null}
 function jpDow(d){return"日月火水木金土"[d.getDay()]}
+function isoLocal(d){let z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)}
 function getMonthRows(y,m){let r=committees.map(c=>({...c,date:nthDow(y,m,c.week,c.dow),kind:"定例"})).filter(x=>x.date);let s=singles.map(x=>({...x,date:new Date(x.date+"T00:00:00"),kind:"単発"})).filter(x=>x.date.getFullYear()==y&&x.date.getMonth()+1==m);return[...r,...s].sort((a,b)=>a.date-b.date||(a.time||"99").localeCompare(b.time||"99"))}
-function eventCard(e){return`<div class="event"><div class="date">${e.date.getMonth()+1}/${e.date.getDate()}（${jpDow(e.date)}） ${e.time||""}${e.end?"–"+e.end:""}</div><div><span class="tag">${e.type}</span>${e.name}</div><div class="meta">${e.memo||""}</div></div>`}
-function renderAll(){renderMonth();renderRegular();renderSingle();renderWork();}
-function renderMonth(){let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m);monthList.innerHTML=rows.length?rows.map(eventCard).join(""):"予定なし"}
-function renderWork(){let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m).filter(x=>["委員会","部会","会議","研修"].includes(x.type));workList.innerHTML=rows.map(eventCard).join("")}
-function copyWorkRequests(){let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m).filter(x=>["委員会","部会","会議","研修"].includes(x.type));let text=rows.map(x=>`${x.date.getMonth()+1}/${x.date.getDate()}（${jpDow(x.date)}） ${x.time||""} ${x.name}`).join("\n");navigator.clipboard.writeText(text);alert("コピーしました")}
-function renderRegular(){regularList.innerHTML=committees.map(c=>`<div class="event"><b>${c.name}</b><div class="meta"><span class="tag">${c.type}</span>第${c.week}${"日月火水木金土"[c.dow]}曜 ${c.time||""}${c.end?"–"+c.end:""}</div><div class="actions"><button class="ghost" onclick="editCommittee('${c.id}')">編集</button><button class="danger" onclick="deleteCommittee('${c.id}')">削除</button></div></div>`).join("")}
-function renderSingle(){singleList.innerHTML=singles.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>`<div class="event"><b>${s.date} ${s.name}</b><div class="meta"><span class="tag">${s.type}</span>${s.time||""}${s.end?"–"+s.end:""} ${s.memo||""}</div><div class="actions"><button class="ghost" onclick="editSingle('${s.id}')">編集</button><button class="danger" onclick="deleteSingle('${s.id}')">削除</button></div></div>`).join("")}
-function saveCommittee(){let d={id:editId.value||crypto.randomUUID(),name:name.value,type:type.value,week:Number(week.value),dow:Number(dow.value),time:time.value,end:end.value,memo:memo.value};if(!d.name)return alert("名称を入力");let i=committees.findIndex(x=>x.id==d.id);if(i>=0)committees[i]=d;else committees.push(d);persist();clearForm();renderAll()}
+function getRangeRows(start,end){let rows=[];for(let y=start.getFullYear();y<=end.getFullYear();y++){for(let m=1;m<=12;m++){rows.push(...getMonthRows(y,m))}}return rows.filter(x=>x.date>=start&&x.date<=end).sort((a,b)=>a.date-b.date||(a.time||"99").localeCompare(b.time||"99"))}
+function eventCard(e){let role=e.role?` ${e.role}`:"";return`<div class="event"><div class="date">${e.date.getMonth()+1}/${e.date.getDate()}（${jpDow(e.date)}） ${e.time||""}${e.end?"–"+e.end:""}</div><div><span class="tag">${e.type}</span>${escapeHtml(e.name)}${escapeHtml(role)}</div><div class="meta">${escapeHtml(e.memo||"")}</div></div>`}
+function taskCard(t){let done=t.status==="完了";return`<div class="task ${done?"done":""}"><b><span class="tag tag${t.priority}">${t.priority}</span>${escapeHtml(t.title)}</b><div class="meta">${escapeHtml(targetName(t.committeeId))} ${t.due?"/ 期限 "+t.due:""} / ${t.status}</div><div class="meta">${escapeHtml(t.memo||"")}</div><div class="actions"><button class="ghost" onclick="editTask('${t.id}')">編集</button><button class="ok" onclick="toggleTaskDone('${t.id}')">${done?"未完了へ":"完了"}</button><button class="danger" onclick="deleteTask('${t.id}')">削除</button></div></div>`}
+function escapeHtml(str){return String(str).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
+function renderAll(){renderSelectors();renderHome();renderRegular();renderSingle();renderTasks();renderMinutes();}
+function renderHome(){
+  let now=new Date();let today=new Date(now.getFullYear(),now.getMonth(),now.getDate());let weekEnd=new Date(today);weekEnd.setDate(today.getDate()+6);
+  todayList.innerHTML=getRangeRows(today,today).map(eventCard).join("")||"<div class='small'>予定なし</div>";
+  weekList.innerHTML=getRangeRows(today,weekEnd).map(eventCard).join("")||"<div class='small'>予定なし</div>";
+  let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m);
+  monthList.innerHTML=rows.length?rows.map(eventCard).join(""):"予定なし";
+  renderWork();
+  let open=tasks.filter(t=>t.status!=="完了");
+  let soon=open.filter(t=>t.due && (new Date(t.due+"T00:00:00")-today)/(86400000)<=7);
+  let high=open.filter(t=>["S","A"].includes(t.priority));
+  todoCount.textContent=open.length;dueSoonCount.textContent=soon.length;highCount.textContent=high.length;
+  homeTasks.innerHTML=open.sort(sortTasks).slice(0,6).map(taskCard).join("")||"<div class='small'>未完了タスクなし</div>";
+}
+function sortTasks(a,b){let p={S:0,A:1,B:2,C:3};return (p[a.priority]-p[b.priority]) || ((a.due||"9999").localeCompare(b.due||"9999"))}
+function renderWork(){
+  let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m).filter(x=>["委員会","部会","会議","研修"].includes(x.type));
+  workList.innerHTML=rows.map(eventCard).join("")||"<div class='small'>候補なし</div>"
+}
+function workRequestText(){let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m).filter(x=>["委員会","部会","会議","研修"].includes(x.type));return rows.map(x=>`${x.date.getMonth()+1}/${x.date.getDate()}（${jpDow(x.date)}） ${x.time||""} ${x.name}${x.role?" "+x.role:""}`).join("\n")}
+function renderWorkText(){workText.innerHTML=`<div class="copybox">${escapeHtml(workRequestText())}</div>`}
+function copyWorkRequests(){let text=workRequestText();navigator.clipboard.writeText(text).then(()=>alert("コピーしました")).catch(()=>{renderWorkText();alert("コピーできない環境なのでテキスト表示しました")})}
+function renderRegular(){let q=(regularSearch?.value||"").toLowerCase();regularList.innerHTML=committees.filter(c=>c.name.toLowerCase().includes(q)).map(c=>`<div class="event"><b>${escapeHtml(c.name)}</b><div class="meta"><span class="tag">${c.type}</span>第${c.week}${"日月火水木金土"[c.dow]}曜 ${c.time||""}${c.end?"–"+c.end:""}</div><div class="meta">${escapeHtml(c.memo||"")}</div><div class="actions"><button class="ghost" onclick="editCommittee('${c.id}')">編集</button><button class="danger" onclick="deleteCommittee('${c.id}')">削除</button></div></div>`).join("")}
+function renderSingle(){singleList.innerHTML=singles.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>`<div class="event"><b>${s.date} ${escapeHtml(s.name)}</b><div class="meta"><span class="tag">${s.type}</span>${escapeHtml(s.role||"")} ${s.time||""}${s.end?"–"+s.end:""} ${escapeHtml(s.memo||"")}</div><div class="actions"><button class="ghost" onclick="editSingle('${s.id}')">編集</button><button class="danger" onclick="deleteSingle('${s.id}')">削除</button></div></div>`).join("")}
+function renderTasks(){let mode=taskFilter.value, cid=taskCommitteeFilter.value;let arr=[...tasks];if(mode==="open")arr=arr.filter(t=>t.status!=="完了");if(mode==="done")arr=arr.filter(t=>t.status==="完了");if(cid)arr=arr.filter(t=>t.committeeId===cid);taskList.innerHTML=arr.sort(sortTasks).map(taskCard).join("")||"<div class='small'>該当なし</div>"}
+function renderMinutes(){minutesList.innerHTML=minutes.sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(m=>`<div class="minute"><b>${escapeHtml(m.date||"")} ${escapeHtml(targetName(m.targetId))}</b><div class="meta">内容</div><div>${escapeHtml(m.text||"").replaceAll("\n","<br>")}</div><div class="meta">宿題</div><div>${escapeHtml(m.actions||"").replaceAll("\n","<br>")}</div><div class="actions"><button class="danger" onclick="deleteMinute('${m.id}')">削除</button></div></div>`).join("")||"<div class='small'>議事録なし</div>"}
+function renderSelectors(){let opts='<option value="">未指定</option>'+allTargets().map(t=>`<option value="${t.id}">${escapeHtml(t.name)}</option>`).join("");taskCommittee.innerHTML=opts;taskCommitteeFilter.innerHTML='<option value="">全委員会</option>'+allTargets().map(t=>`<option value="${t.id}">${escapeHtml(t.name)}</option>`).join("");minuteTarget.innerHTML=opts;}
+function saveCommittee(){let d={id:editId.value||uid(),name:name.value,type:type.value,week:Number(week.value),dow:Number(dow.value),time:time.value,end:end.value,memo:memo.value};if(!d.name)return alert("名称を入力");let i=committees.findIndex(x=>x.id==d.id);if(i>=0)committees[i]=d;else committees.push(d);persist();clearForm();renderAll()}
 function editCommittee(id){let c=committees.find(x=>x.id==id);editId.value=c.id;name.value=c.name;type.value=c.type;week.value=c.week;dow.value=c.dow;time.value=c.time;end.value=c.end;memo.value=c.memo;showView("regular",document.querySelectorAll(".tabs button")[1])}
 function deleteCommittee(id){if(confirm("削除しますか？")){committees=committees.filter(x=>x.id!=id);persist();renderAll()}}
 function clearForm(){editId.value=name.value=time.value=end.value=memo.value="";type.value="委員会";week.value=2;dow.value=2}
-function saveSingle(){let d={id:singleEditId.value||crypto.randomUUID(),date:singleDate.value,name:singleName.value,type:singleType.value,time:singleTime.value,end:singleEnd.value,memo:singleMemo.value};if(!d.date||!d.name)return alert("日付と名称を入力");let i=singles.findIndex(x=>x.id==d.id);if(i>=0)singles[i]=d;else singles.push(d);persist();clearSingle();renderAll()}
-function editSingle(id){let s=singles.find(x=>x.id==id);singleEditId.value=s.id;singleDate.value=s.date;singleName.value=s.name;singleType.value=s.type;singleTime.value=s.time;singleEnd.value=s.end;singleMemo.value=s.memo;showView("single",document.querySelectorAll(".tabs button")[2])}
+function saveSingle(){let d={id:singleEditId.value||uid(),date:singleDate.value,name:singleName.value,type:singleType.value,role:singleRole.value,time:singleTime.value,end:singleEnd.value,memo:singleMemo.value};if(!d.date||!d.name)return alert("日付と名称を入力");let i=singles.findIndex(x=>x.id==d.id);if(i>=0)singles[i]=d;else singles.push(d);persist();clearSingle();renderAll()}
+function editSingle(id){let s=singles.find(x=>x.id==id);singleEditId.value=s.id;singleDate.value=s.date;singleName.value=s.name;singleType.value=s.type;singleRole.value=s.role||"";singleTime.value=s.time;singleEnd.value=s.end;singleMemo.value=s.memo;showView("single",document.querySelectorAll(".tabs button")[2])}
 function deleteSingle(id){if(confirm("削除しますか？")){singles=singles.filter(x=>x.id!=id);persist();renderAll()}}
-function clearSingle(){singleEditId.value=singleDate.value=singleName.value=singleTime.value=singleEnd.value=singleMemo.value="";singleType.value="研修"}
-function parseOCR(){let text=ocrText.value,lines=text.split(/\n/).map(x=>x.trim()).filter(Boolean),y=Number(year.value),cs=[];for(let line of lines){let m=line.match(/(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*(\d{1,2})[月\/\.\-]\s*(\d{1,2})日?/i);if(!m)continue;let yy=y;if(m[1]){if(m[1].startsWith("20"))yy=Number(m[1]);else yy=2018+Number(m[1].replace(/[^\d]/g,""))}let mm=String(Number(m[2])).padStart(2,"0"),dd=String(Number(m[3])).padStart(2,"0");let tm=line.match(/(\d{1,2})[:：](\d{2})/);let t=tm?`${String(Number(tm[1])).padStart(2,"0")}:${tm[2]}`:"";let clean=line.replace(m[0],"").replace(/(\d{1,2})[:：](\d{2})/,"").trim();let tp=/研修|講習|講座/.test(clean)?"研修":/委員会/.test(clean)?"委員会":/部会/.test(clean)?"部会":"会議";cs.push({date:`${yy}-${mm}-${dd}`,name:clean||line,type:tp,time:t})}ocrCandidates.innerHTML=cs.length?cs.map((c,i)=>`<div class="event"><label><input type="checkbox" class="pick" data-i="${i}" checked> 追加</label><input id="od${i}" value="${c.date}"><input id="on${i}" value="${c.name}"><input id="ot${i}" value="${c.time}"><input id="op${i}" value="${c.type}"></div>`).join("")+`<button class="ok" onclick="addOCR(${cs.length})">選択分を追加</button>`:"<div class='warn'>候補なし</div>"}
-function addOCR(n){for(let i=0;i<n;i++){let cb=document.querySelector(`.pick[data-i="${i}"]`);if(cb&&cb.checked)singles.push({id:crypto.randomUUID(),date:document.getElementById(`od${i}`).value,name:document.getElementById(`on${i}`).value,type:document.getElementById(`op${i}`).value,time:document.getElementById(`ot${i}`).value,end:"",memo:"取込"})}persist();renderAll();alert("追加しました")}
-function exportJson(){let blob=new Blob([JSON.stringify({committees,singles},null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="committee_backup.json";a.click()}
-function importJson(){let inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=e=>{let r=new FileReader();r.onload=()=>{let d=JSON.parse(r.result);committees=d.committees||committees;singles=d.singles||singles;persist();renderAll()};r.readAsText(e.target.files[0])};inp.click()}
-function init(){let now=new Date();for(let yy=2026;yy<=2028;yy++)year.innerHTML+=`<option ${yy==now.getFullYear()?"selected":""}>${yy}</option>`;for(let mm=1;mm<=12;mm++)month.innerHTML+=`<option value="${mm}" ${mm==now.getMonth()+1?"selected":""}>${mm}月</option>`;renderAll();if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js")}
+function clearSingle(){singleEditId.value=singleDate.value=singleName.value=singleTime.value=singleEnd.value=singleMemo.value="";singleType.value="研修";singleRole.value=""}
+function saveTask(){let d={id:taskEditId.value||uid(),title:taskTitle.value,committeeId:taskCommittee.value,due:taskDue.value,priority:taskPriority.value,status:taskStatus.value,memo:taskMemo.value};if(!d.title)return alert("内容を入力");let i=tasks.findIndex(x=>x.id==d.id);if(i>=0)tasks[i]=d;else tasks.push(d);persist();clearTask();renderAll()}
+function editTask(id){let t=tasks.find(x=>x.id==id);taskEditId.value=t.id;taskTitle.value=t.title;taskCommittee.value=t.committeeId||"";taskDue.value=t.due||"";taskPriority.value=t.priority;taskStatus.value=t.status;taskMemo.value=t.memo||"";showView("tasks",document.querySelectorAll(".tabs button")[3])}
+function toggleTaskDone(id){let t=tasks.find(x=>x.id==id);t.status=t.status==="完了"?"未着手":"完了";persist();renderAll()}
+function deleteTask(id){if(confirm("削除しますか？")){tasks=tasks.filter(x=>x.id!=id);persist();renderAll()}}
+function clearTask(){taskEditId.value=taskTitle.value=taskDue.value=taskMemo.value="";taskCommittee.value="";taskPriority.value="A";taskStatus.value="未着手"}
+function saveMinute(makeTasks){let m={id:uid(),targetId:minuteTarget.value,date:minuteDate.value,text:minuteText.value,actions:minuteActions.value};minutes.push(m);if(makeTasks){minuteActions.value.split(/\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>tasks.push({id:uid(),title:line,committeeId:minuteTarget.value,due:"",priority:"A",status:"未着手",memo:"議事録から追加"}));}minuteText.value=minuteActions.value=minuteDate.value="";persist();renderAll()}
+function deleteMinute(id){if(confirm("削除しますか？")){minutes=minutes.filter(x=>x.id!=id);persist();renderAll()}}
+function parseOCR(){let text=ocrText.value,lines=text.split(/\n/).map(x=>x.trim()).filter(Boolean),y=Number(year.value),cs=[];for(let line of lines){let m=line.match(/(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*(\d{1,2})[月\/\.\-]\s*(\d{1,2})日?/i);if(!m)continue;let yy=y;if(m[1]){if(m[1].startsWith("20"))yy=Number(m[1]);else yy=2018+Number(m[1].replace(/[^\d]/g,""))}let mm=String(Number(m[2])).padStart(2,"0"),dd=String(Number(m[3])).padStart(2,"0");let tm=line.match(/(\d{1,2})[:：](\d{2})/);let t=tm?`${String(Number(tm[1])).padStart(2,"0")}:${tm[2]}`:"";let clean=line.replace(m[0],"").replace(/(\d{1,2})[:：](\d{2})/,"").trim();let tp=/研修|講習|講座/.test(clean)?"研修":/委員会/.test(clean)?"委員会":/部会/.test(clean)?"部会":"会議";cs.push({date:`${yy}-${mm}-${dd}`,name:clean||line,type:tp,time:t})}ocrCandidates.innerHTML=cs.length?cs.map((c,i)=>`<div class="event"><label><input type="checkbox" class="pick" data-i="${i}" checked> 追加</label><label>日付</label><input id="od${i}" value="${c.date}"><label>名称</label><input id="on${i}" value="${escapeHtml(c.name)}"><label>時刻</label><input id="ot${i}" value="${c.time}"><label>種別</label><input id="op${i}" value="${c.type}"></div>`).join("")+`<button class="ok" onclick="addOCR(${cs.length})">選択分を追加</button>`:"<div class='warn'>候補なし。7/29、7月29日、2026/7/29の形が拾いやすい。</div>"}
+function addOCR(n){for(let i=0;i<n;i++){let cb=document.querySelector(`.pick[data-i="${i}"]`);if(cb&&cb.checked)singles.push({id:uid(),date:document.getElementById(`od${i}`).value,name:document.getElementById(`on${i}`).value,type:document.getElementById(`op${i}`).value,role:"",time:document.getElementById(`ot${i}`).value,end:"",memo:"取込"})}persist();renderAll();alert("追加しました")}
+function exportJson(){let blob=new Blob([JSON.stringify({committees,singles,tasks,minutes},null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="natsumi_secretary_backup.json";a.click()}
+function importJson(){let inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=e=>{let r=new FileReader();r.onload=()=>{let d=JSON.parse(r.result);committees=d.committees||committees;singles=d.singles||singles;tasks=d.tasks||tasks;minutes=d.minutes||minutes;persist();renderAll()};r.readAsText(e.target.files[0])};inp.click()}
+function jumpToday(){let now=new Date();year.value=now.getFullYear();month.value=now.getMonth()+1;renderAll()}
+function init(){let now=new Date();for(let yy=2026;yy<=2028;yy++)year.innerHTML+=`<option ${yy==now.getFullYear()?"selected":""}>${yy}</option>`;for(let mm=1;mm<=12;mm++)month.innerHTML+=`<option value="${mm}" ${mm==now.getMonth()+1?"selected":""}>${mm}月</option>`;mergeDefaults();persist();renderAll();if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
 init();
 </script>
 </body>
