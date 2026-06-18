@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="夏海秘書">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<title>夏海秘書アプリ Ver5.2.2</title>
+<style>
+:root{--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--main:#2563eb;--line:#e2e8f0;--danger:#dc2626;--ok:#16a34a;--warn:#f59e0b;--dark:#0f172a}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:10;background:var(--dark);color:white;padding:14px 16px calc(12px + env(safe-area-inset-top));box-shadow:0 2px 12px #0003}
+h1{font-size:20px;margin:0;font-weight:900}.sub{font-size:12px;color:#cbd5e1;margin-top:4px}
+main{padding:12px;max-width:880px;margin:auto;padding-bottom:98px}
+.card{background:var(--card);border-radius:18px;padding:14px;margin:0 0 12px;box-shadow:0 3px 14px #0000000d;border:1px solid #eef2f7}
+h2{font-size:17px;margin:0 0 10px;font-weight:900}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,textarea{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px;background:white;min-height:44px}
+label{display:block;font-size:12px;color:#475569;margin:10px 0 4px;font-weight:700}
+textarea{min-height:98px}
+button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:14px;cursor:pointer;min-height:42px}
+.primary{background:var(--main);color:#fff}.ghost{background:#e2e8f0;color:#0f172a}.danger{background:#dc2626;color:#fff}.ok{background:#16a34a;color:#fff}.warnbtn{background:#f59e0b;color:#111827}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:20}
+.tabs button{border-radius:0;background:white;color:#475569;padding:10px 2px;font-size:11px;min-height:50px}
+.tabs button.active{color:#2563eb;background:#eff6ff}
+.view{display:none}.view.active{display:block}
+.event,.task,.minute{border:1px solid var(--line);border-radius:15px;padding:12px;margin:8px 0;background:#fff}
+.event .date{font-weight:900}.meta{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.45}
+.tag{display:inline-block;border-radius:999px;padding:2px 8px;font-size:12px;background:#eef2ff;color:#3730a3;margin-right:4px;font-weight:800}
+.tagS{background:#fee2e2;color:#991b1b}.tagA{background:#ffedd5;color:#9a3412}.tagB{background:#fef9c3;color:#854d0e}.tagC{background:#dcfce7;color:#166534}
+.small{font-size:12px;color:var(--muted)}
+.warn{background:#fff7ed;border:1px solid #fed7aa;padding:10px;border-radius:12px;font-size:13px;line-height:1.5}
+.actions{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.done{opacity:.58}.done b{text-decoration:line-through}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.kpi{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.kpi b{font-size:22px;display:block}
+.search{position:sticky;top:72px;z-index:6;background:var(--bg);padding-bottom:8px}
+.copybox{white-space:pre-wrap;background:#0f172a;color:#f8fafc;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;overflow:auto}
+.monthGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.monthGrid label{margin:0;background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:9px;font-size:13px;color:#0f172a;display:flex;gap:4px;align-items:center}
+.monthGrid input{width:auto;min-height:0}
+
+.event{border-left:8px solid #94a3b8}
+.event.kind-meeting{border-left-color:#2563eb;background:#eff6ff}
+.event.kind-training-own{border-left-color:#dc2626;background:#fff1f2}
+.event.kind-training-attend{border-left-color:#facc15;background:#fefce8}
+.event.kind-private{border-left-color:#16a34a;background:#f0fdf4}
+.event.kind-other{border-left-color:#94a3b8;background:#f8fafc}
+.event.overlap{background:#fee2e2!important;border-color:#dc2626!important}
+.tag.meeting{background:#dbeafe;color:#1e40af}
+.tag.training-own{background:#fee2e2;color:#991b1b}
+.tag.training-attend{background:#fef9c3;color:#854d0e}
+.tag.private{background:#dcfce7;color:#166534}
+.filterBar{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px}
+.filterBar button{white-space:nowrap;background:#e2e8f0;color:#0f172a}
+.filterBar button.activeFilter{background:#2563eb;color:#fff}
+
+@media(min-width:720px){main{padding-top:18px}.tabs{max-width:880px;margin:auto;left:50%;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0}}
+</style>
+</head>
+<body>
+<header><h1>夏海秘書アプリ Ver5.2.2</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
+<main>
+<section id="home" class="view active">
+ <div class="card"><h2>表示月</h2><div class="row"><select id="year"></select><select id="month"></select><button class="primary" onclick="renderAll()">更新</button><button class="ghost" onclick="jumpToday()">今月</button></div></div>
+ <div class="card"><h2>今日の予定</h2><div id="todayList"></div></div>
+ <div class="card"><h2>今週の予定</h2><div id="weekList"></div></div>
+ <div class="card"><h2>未完了タスク</h2><div class="kpis"><div class="kpi"><b id="todoCount">0</b><span class="small">未完了</span></div><div class="kpi"><b id="dueSoonCount">0</b><span class="small">7日以内</span></div><div class="kpi"><b id="highCount">0</b><span class="small">S/A</span></div></div><div id="homeTasks"></div></div>
+ <div class="card"><h2>今月の予定</h2>
+<div class="filterBar">
+<button type="button" class="activeFilter" onclick="setEventFilter('all',this)">全て</button>
+<button type="button" onclick="setEventFilter('meeting',this)">会議</button>
+<button type="button" onclick="setEventFilter('training-own',this)">研修担当</button>
+<button type="button" onclick="setEventFilter('training-attend',this)">研修受講</button>
+<button type="button" onclick="setEventFilter('private',this)">私用</button>
+</div><div id="monthList"></div></div>
+ <div class="card"><h2>勤務希望候補</h2><div class="row"><button class="ok" onclick="copyWorkRequests()">勤務希望日をコピー</button><button class="ghost" onclick="renderWorkText()">テキスト表示</button></div><div id="workText"></div><div id="workList"></div></div>
+</section>
+
+<section id="regular" class="view">
+ <div class="card search"><h2>委員会・定例</h2><input id="regularSearch" placeholder="検索" oninput="renderRegular()"></div>
+ <div class="card"><div id="regularList"></div></div>
+ <div class="card" id="regularFormCard">
+  <h2>定例を追加・編集</h2>
+  <input type="hidden" id="editId">
+  <label>名称</label><input id="name" autocomplete="off">
+  <label>種別</label><select id="type"><option value="委員会">委員会</option><option value="部会">部会</option><option value="会議">会議</option><option value="研修">研修</option><option value="私用">私用</option><option value="その他">その他</option></select>
+  <div class="row"><div style="flex:1"><label>開催週</label><select id="week"><option value="1">第1</option><option value="2">第2</option><option value="3">第3</option><option value="4">第4</option><option value="5">第5</option></select></div><div style="flex:1"><label>曜日</label><select id="dow"><option value="1">月</option><option value="2">火</option><option value="3">水</option><option value="4">木</option><option value="5">金</option><option value="6">土</option><option value="0">日</option></select></div></div>
+  <div class="row"><div style="flex:1"><label>開始</label><input id="time" type="time"></div><div style="flex:1"><label>終了</label><input id="end" type="time"></div></div>
+  <label>開催月</label>
+  <select id="monthPattern" onchange="toggleCustomMonths()"><option value="all">毎月</option><option value="odd">奇数月のみ</option><option value="even">偶数月のみ</option><option value="custom">指定月のみ</option></select>
+  <div id="customMonthsBox" style="display:none"><div class="monthGrid" id="customMonths"></div></div>
+  <label>メモ</label><textarea id="memo"></textarea>
+  <div class="actions"><button class="primary" type="button" onclick="saveCommittee()">保存</button><button class="ghost" type="button" onclick="clearForm()">クリア</button></div>
+ </div>
+</section>
+
+<section id="single" class="view">
+ <div class="card"><h2>研修・単発予定</h2><div id="singleList"></div></div>
+ <div class="card" id="singleFormCard">
+  <h2>単発予定を追加・編集</h2><input type="hidden" id="singleEditId">
+  <label>日付</label><input id="singleDate" type="date">
+  <label>名称</label><input id="singleName">
+  <label>種別</label><select id="singleType"><option value="研修">研修</option><option value="委員会">委員会</option><option value="部会">部会</option><option value="会議">会議</option><option value="私用">私用</option><option value="その他">その他</option></select>
+  <label>役割</label><select id="singleRole"><option value=""></option><option value="講師">講師</option><option value="担当">担当</option><option value="ファシリテーター">ファシリテーター</option><option value="受講">受講</option></select>
+  <div class="row"><div style="flex:1"><label>開始</label><input id="singleTime" type="time"></div><div style="flex:1"><label>終了</label><input id="singleEnd" type="time"></div></div>
+  <label>メモ</label><textarea id="singleMemo"></textarea>
+  <div class="actions"><button class="primary" type="button" onclick="saveSingle()">保存</button><button class="ghost" type="button" onclick="clearSingle()">クリア</button></div>
+ </div>
+</section>
+
+<section id="tasks" class="view">
+ <div class="card"><h2>タスク一覧</h2><div class="row"><select id="taskFilter" onchange="renderTasks()"><option value="open">未完了</option><option value="all">全て</option><option value="done">完了</option></select><select id="taskCommitteeFilter" onchange="renderTasks()"></select></div><div id="taskList"></div></div>
+ <div class="card" id="taskFormCard"><h2>タスク追加・編集</h2><input type="hidden" id="taskEditId"><label>内容</label><input id="taskTitle" placeholder="例：処方カレンダー確認"><label>関連委員会</label><select id="taskCommittee"></select><div class="row"><div style="flex:1"><label>期限</label><input id="taskDue" type="date"></div><div style="flex:1"><label>優先度</label><select id="taskPriority"><option>S</option><option>A</option><option>B</option><option>C</option></select></div></div><label>状態</label><select id="taskStatus"><option>未着手</option><option>進行中</option><option>完了</option></select><label>メモ</label><textarea id="taskMemo"></textarea><div class="actions"><button class="primary" onclick="saveTask()">保存</button><button class="ghost" onclick="clearTask()">クリア</button></div></div>
+</section>
+
+<section id="minutes" class="view">
+ <div class="card"><h2>議事録</h2><div id="minutesList"></div></div>
+ <div class="card"><h2>議事録追加</h2><label>対象</label><select id="minuteTarget"></select><label>開催日</label><input id="minuteDate" type="date"><label>決定事項・内容</label><textarea id="minuteText" placeholder="議事録の要点"></textarea><label>次回までの宿題</label><textarea id="minuteActions" placeholder="1行1タスク。保存＋宿題化で自動登録"></textarea><div class="actions"><button class="primary" onclick="saveMinute(false)">議事録保存</button><button class="ok" onclick="saveMinute(true)">保存＋宿題化</button></div></div>
+</section>
+
+<section id="ocr" class="view">
+ <div class="card"><h2>取込</h2><div class="warn">iPhoneでは写真アプリやGoogleレンズで文字コピー → ここに貼る運用が安定。日付入りの行を候補化します。</div><label>読み取ったテキスト</label><textarea id="ocrText" placeholder="例：7月29日 レベル2急変時研修 担当"></textarea><button class="primary" onclick="parseOCR()">候補を作成</button><div id="ocrCandidates"></div></div>
+ <div class="card"><h2>保存・復元</h2><div class="actions"><button class="primary" onclick="exportJson()">バックアップ保存</button><button class="ghost" onclick="importJson()">復元</button><button class="warnbtn" onclick="resetInitialData()">初期データ再投入</button></div><p class="small">アップデート前はバックアップ。新しい版で復元すればデータが戻ります。</p></div>
+</section>
+</main>
+
+<nav class="tabs"><button class="active" onclick="showView('home',this)">予定</button><button onclick="showView('regular',this)">委員会</button><button onclick="showView('single',this)">研修</button><button onclick="showView('tasks',this)">宿題</button><button onclick="showView('minutes',this)">議事録</button><button onclick="showView('ocr',this)">取込</button></nav>
+
+<script>
+const APP_VERSION="5.2";
+function uid(){return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())}
+const defaultData=[
+{id:uid(),name:"特定行為に関する検討委員会",type:"委員会",week:2,dow:2,time:"16:00",end:"",memo:"5月以降",monthPattern:"all",months:[]},
+{id:uid(),name:"リスク部会班会議（薬剤班）",type:"部会",week:2,dow:3,time:"16:00",end:"",memo:"",monthPattern:"all",months:[]},
+{id:uid(),name:"リスクマネジメント会議",type:"会議",week:2,dow:4,time:"14:00",end:"",memo:"",monthPattern:"all",months:[]},
+{id:uid(),name:"副師長会議",type:"会議",week:2,dow:4,time:"15:00",end:"",memo:"",monthPattern:"all",months:[]},
+{id:uid(),name:"看護部広報委員会",type:"委員会",week:2,dow:5,time:"15:00",end:"16:00",memo:"広報委員会。広報部会とは別",monthPattern:"all",months:[]},
+{id:uid(),name:"クリニカルパス委員会",type:"委員会",week:3,dow:4,time:"15:00",end:"16:00",memo:"奇数月のみ",monthPattern:"odd",months:[]},
+{id:uid(),name:"SNS部会",type:"部会",week:3,dow:4,time:"16:30",end:"",memo:"",monthPattern:"all",months:[]},
+{id:uid(),name:"広報部会",type:"部会",week:4,dow:2,time:"",end:"",memo:"看護部広報委員会とは別",monthPattern:"all",months:[]},
+{id:uid(),name:"フットサル",type:"私用",week:4,dow:4,time:"20:00",end:"",memo:"",monthPattern:"all",months:[]}
+];
+const defaultSingles=[
+{id:uid(),date:"2026-07-29",name:"レベル2急変時研修",type:"研修",role:"担当",time:"",end:"",memo:""},
+{id:uid(),date:"2026-09-03",name:"コース研修",type:"研修",role:"講師",time:"",end:"",memo:""},
+{id:uid(),date:"2026-09-24",name:"レベル別急変対応コース研修",type:"研修",role:"",time:"",end:"",memo:""},
+{id:uid(),date:"2026-09-28",name:"レベル1急変時研修",type:"研修",role:"ファシリテーター",time:"",end:"",memo:""},
+{id:uid(),date:"2026-11-05",name:"レベル別急変対応コース研修",type:"研修",role:"",time:"",end:"",memo:""},
+{id:uid(),date:"2026-11-16",name:"急変対応コース研修",type:"研修",role:"",time:"",end:"",memo:""},
+{id:uid(),date:"2027-01-27",name:"急変対応コース研修",type:"研修",role:"",time:"",end:"",memo:""}
+];
+const defaultTasks=[
+{id:uid(),title:"配薬カート廊下禁止の周知",committeeId:"",due:"",priority:"S",status:"未着手",memo:"見かけたら声かけ。病棟会・リーダー会で周知"},
+{id:uid(),title:"内服自己管理見直し",committeeId:"",due:"",priority:"A",status:"進行中",memo:"糖尿病薬・抗血栓薬・抗菌薬"},
+{id:uid(),title:"処方カレンダー導入検討",committeeId:"",due:"",priority:"B",status:"未着手",memo:"SE確認・診療部巻き込み"},
+{id:uid(),title:"急変対応研修 7/29準備",committeeId:"",due:"2026-07-29",priority:"S",status:"未着手",memo:"レベル2 急変時研修 担当"},
+{id:uid(),title:"Instagram広報投稿の進捗確認",committeeId:"",due:"",priority:"B",status:"進行中",memo:"看護部広報委員会・SNS部会"}
+];
+let committees=JSON.parse(localStorage.getItem("committees")||"null")||defaultData;
+let singles=JSON.parse(localStorage.getItem("singles")||"null")||defaultSingles;
+let tasks=JSON.parse(localStorage.getItem("tasks")||"null")||defaultTasks;
+let minutes=JSON.parse(localStorage.getItem("committeeMinutes")||"[]");
+function normalize(){committees.forEach(c=>{if(!c.monthPattern)c.monthPattern="all"; if(!Array.isArray(c.months))c.months=[]});}
+function persist(){normalize();localStorage.setItem("committees",JSON.stringify(committees));localStorage.setItem("singles",JSON.stringify(singles));localStorage.setItem("tasks",JSON.stringify(tasks));localStorage.setItem("committeeMinutes",JSON.stringify(minutes));localStorage.setItem("appVersion",APP_VERSION);}
+function mergeDefaults(){defaultData.forEach(d=>{if(!committees.some(c=>c.name===d.name)) committees.push({...d,id:uid()})});defaultSingles.forEach(d=>{if(!singles.some(s=>s.date===d.date&&s.name===d.name)) singles.push({...d,id:uid()})});defaultTasks.forEach(d=>{if(!tasks.some(t=>t.title===d.title)) tasks.push({...d,id:uid()})});normalize();}
+function resetInitialData(){if(confirm("初期データを再投入します。既存データは残して不足分だけ追加します。")){mergeDefaults();persist();renderAll();alert("再投入しました")}}
+function allTargets(){return [...committees.map(x=>({...x,targetType:"regular"})),...singles.map(x=>({...x,targetType:"single"}))]}
+function targetName(id){let t=allTargets().find(x=>x.id===id);return t?t.name:"未指定"}
+function showView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));btn.classList.add("active");}
+function nthDow(y,m,n,dow){let d=new Date(y,m-1,1),c=0;while(d.getMonth()==m-1){if(d.getDay()==Number(dow)){c++;if(c==Number(n))return new Date(d)}d.setDate(d.getDate()+1)}return null}
+function monthMatches(c,m){let p=c.monthPattern||"all"; if(p==="all")return true; if(p==="odd")return m%2===1; if(p==="even")return m%2===0; if(p==="custom")return (c.months||[]).map(Number).includes(Number(m)); return true;}
+function jpDow(d){return"日月火水木金土"[d.getDay()]}
+function getMonthRows(y,m){let r=committees.filter(c=>monthMatches(c,m)).map(c=>({...c,date:nthDow(y,m,c.week,c.dow),kind:"定例"})).filter(x=>x.date);let s=singles.map(x=>({...x,date:new Date(x.date+"T00:00:00"),kind:"単発"})).filter(x=>x.date.getFullYear()==y&&x.date.getMonth()+1==m);return[...r,...s].sort((a,b)=>a.date-b.date||(a.time||"99").localeCompare(b.time||"99"))}
+function getRangeRows(start,end){let rows=[];for(let y=start.getFullYear();y<=end.getFullYear();y++){for(let m=1;m<=12;m++){rows.push(...getMonthRows(y,m))}}return rows.filter(x=>x.date>=start&&x.date<=end).sort((a,b)=>a.date-b.date||(a.time||"99").localeCompare(b.time||"99"))}
+function escapeHtml(str){return String(str).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
+function monthLabel(c){let p=c.monthPattern||"all";if(p==="all")return"毎月";if(p==="odd")return"奇数月";if(p==="even")return"偶数月";if(p==="custom")return(c.months||[]).join(",")+"月";return"毎月";}
+
+let currentEventFilter="all";
+function eventKind(e){
+  const type=e.type||"";
+  const role=e.role||"";
+  const name=e.name||"";
+  if(type==="私用") return "private";
+  if(type==="研修"){
+    if(["担当","講師","ファシリテーター"].includes(role) || /担当|講師|ファシリテーター/.test(name+role)) return "training-own";
+    return "training-attend";
+  }
+  if(["委員会","部会","会議"].includes(type)) return "meeting";
+  return "other";
+}
+function kindLabel(kind){
+  return {
+    "meeting":"会議",
+    "training-own":"研修（担当）",
+    "training-attend":"研修（受講）",
+    "private":"私用",
+    "other":"その他"
+  }[kind]||"その他";
+}
+function kindIcon(kind){
+  return {
+    "meeting":"🔵",
+    "training-own":"🔴",
+    "training-attend":"🟡",
+    "private":"🟢",
+    "other":"⚪"
+  }[kind]||"⚪";
+}
+function setEventFilter(kind,btn){
+  currentEventFilter=kind;
+  document.querySelectorAll(".filterBar button").forEach(b=>b.classList.remove("activeFilter"));
+  if(btn) btn.classList.add("activeFilter");
+  renderHome();
+}
+function hasOverlapForEvent(e){
+  if(!e.date || !e.time || !e.end) return false;
+  const dateStr=`${e.date.getFullYear()}-${String(e.date.getMonth()+1).padStart(2,"0")}-${String(e.date.getDate()).padStart(2,"0")}`;
+  const events=getMonthRows(e.date.getFullYear(),e.date.getMonth()+1);
+  return events.some(x=>{
+    if(x===e) return false;
+    const xDate=`${x.date.getFullYear()}-${String(x.date.getMonth()+1).padStart(2,"0")}-${String(x.date.getDate()).padStart(2,"0")}`;
+    if(xDate!==dateStr || !x.time || !x.end) return false;
+    return e.time < x.end && e.end > x.time;
+  });
+}
+function eventCard(e){
+  let role=e.role?` ${e.role}`:"";
+  const kind=eventKind(e);
+  const overlap=hasOverlapForEvent(e);
+  return `<div class="event kind-${kind} ${overlap?"overlap":""}">
+    <div class="date">${kindIcon(kind)} ${e.date.getMonth()+1}/${e.date.getDate()}（${jpDow(e.date)}） ${e.time||""}${e.end?"–"+e.end:""}</div>
+    <div><span class="tag ${kind}">${kindLabel(kind)}</span>${escapeHtml(e.name)}${escapeHtml(role)} ${overlap?"<span class='tag training-own'>重複</span>":""}</div>
+    <div class="meta">${escapeHtml(e.memo||"")}</div>
+  </div>`;
+}
+function taskCard(t){let done=t.status==="完了";return`<div class="task ${done?"done":""}"><b><span class="tag tag${t.priority}">${t.priority}</span>${escapeHtml(t.title)}</b><div class="meta">${escapeHtml(targetName(t.committeeId))} ${t.due?"/ 期限 "+t.due:""} / ${t.status}</div><div class="meta">${escapeHtml(t.memo||"")}</div><div class="actions"><button class="ghost" onclick="editTask('${t.id}')">編集</button><button class="ok" onclick="toggleTaskDone('${t.id}')">${done?"未完了へ":"完了"}</button><button class="danger" onclick="deleteTask('${t.id}')">削除</button></div></div>`}
+function renderAll(){renderSelectors();renderHome();renderRegular();renderSingle();renderTasks();renderMinutes();}
+function renderHome(){let now=new Date();let today=new Date(now.getFullYear(),now.getMonth(),now.getDate());let weekEnd=new Date(today);weekEnd.setDate(today.getDate()+6);todayList.innerHTML=getRangeRows(today,today).map(eventCard).join("")||"<div class='small'>予定なし</div>";weekList.innerHTML=getRangeRows(today,weekEnd).map(eventCard).join("")||"<div class='small'>予定なし</div>";let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m);let filteredRows=currentEventFilter==="all"?rows:rows.filter(e=>eventKind(e)===currentEventFilter);monthList.innerHTML=filteredRows.length?filteredRows.map(eventCard).join(""):"予定なし";renderWork();let open=tasks.filter(t=>t.status!=="完了");let soon=open.filter(t=>t.due&&(new Date(t.due+"T00:00:00")-today)/(86400000)<=7);let high=open.filter(t=>["S","A"].includes(t.priority));todoCount.textContent=open.length;dueSoonCount.textContent=soon.length;highCount.textContent=high.length;homeTasks.innerHTML=open.sort(sortTasks).slice(0,6).map(taskCard).join("")||"<div class='small'>未完了タスクなし</div>";}
+function sortTasks(a,b){let p={S:0,A:1,B:2,C:3};return(p[a.priority]-p[b.priority])||((a.due||"9999").localeCompare(b.due||"9999"))}
+function renderWork(){let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m).filter(x=>["委員会","部会","会議","研修"].includes(x.type));workList.innerHTML=rows.map(eventCard).join("")||"<div class='small'>候補なし</div>"}
+function workRequestText(){let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m).filter(x=>["委員会","部会","会議","研修"].includes(x.type));return rows.map(x=>`${x.date.getMonth()+1}/${x.date.getDate()}（${jpDow(x.date)}） ${x.time||""} ${x.name}${x.role?" "+x.role:""}`).join("\n")}
+function renderWorkText(){workText.innerHTML=`<div class="copybox">${escapeHtml(workRequestText())}</div>`}
+function copyWorkRequests(){let text=workRequestText();navigator.clipboard.writeText(text).then(()=>alert("コピーしました")).catch(()=>{renderWorkText();alert("コピーできない環境なのでテキスト表示しました")})}
+function renderRegular(){let q=(regularSearch?.value||"").toLowerCase();regularList.innerHTML=committees.filter(c=>c.name.toLowerCase().includes(q)).map(c=>`<div class="event"><b>${escapeHtml(c.name)}</b><div class="meta"><span class="tag">${c.type}</span>第${c.week}${"日月火水木金土"[c.dow]}曜 ${c.time||""}${c.end?"–"+c.end:""} / ${monthLabel(c)}</div><div class="meta">${escapeHtml(c.memo||"")}</div><div class="actions"><button class="ghost" onclick="editCommittee('${c.id}')">編集</button><button class="danger" onclick="deleteCommittee('${c.id}')">削除</button></div></div>`).join("")}
+function renderSingle(){singleList.innerHTML=singles.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>`<div class="event"><b>${s.date} ${escapeHtml(s.name)}</b><div class="meta"><span class="tag">${s.type}</span>${escapeHtml(s.role||"")} ${s.time||""}${s.end?"–"+s.end:""} ${escapeHtml(s.memo||"")}</div><div class="actions"><button class="ghost" onclick="editSingle('${s.id}')">編集</button><button class="danger" onclick="deleteSingle('${s.id}')">削除</button></div></div>`).join("")}
+function renderTasks(){let mode=taskFilter.value,cid=taskCommitteeFilter.value;let arr=[...tasks];if(mode==="open")arr=arr.filter(t=>t.status!=="完了");if(mode==="done")arr=arr.filter(t=>t.status==="完了");if(cid)arr=arr.filter(t=>t.committeeId===cid);taskList.innerHTML=arr.sort(sortTasks).map(taskCard).join("")||"<div class='small'>該当なし</div>"}
+function renderMinutes(){minutesList.innerHTML=minutes.sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(m=>`<div class="minute"><b>${escapeHtml(m.date||"")} ${escapeHtml(targetName(m.targetId))}</b><div class="meta">内容</div><div>${escapeHtml(m.text||"").replaceAll("\n","<br>")}</div><div class="meta">宿題</div><div>${escapeHtml(m.actions||"").replaceAll("\n","<br>")}</div><div class="actions"><button class="danger" onclick="deleteMinute('${m.id}')">削除</button></div></div>`).join("")||"<div class='small'>議事録なし</div>"}
+function renderSelectors(){let opts='<option value="">未指定</option>'+allTargets().map(t=>`<option value="${t.id}">${escapeHtml(t.name)}</option>`).join("");taskCommittee.innerHTML=opts;taskCommitteeFilter.innerHTML='<option value="">全委員会</option>'+allTargets().map(t=>`<option value="${t.id}">${escapeHtml(t.name)}</option>`).join("");minuteTarget.innerHTML=opts;}
+function saveCommittee(){let n=document.getElementById("name").value.trim();if(!n){alert("名称を入力");return;}let months=[];if(monthPattern.value==="custom"){document.querySelectorAll(".mcheck:checked").forEach(x=>months.push(Number(x.value)));if(months.length===0){alert("指定月を選択");return;}}let d={id:editId.value||uid(),name:n,type:type.value,week:Number(week.value),dow:Number(dow.value),time:time.value,end:end.value,memo:memo.value,monthPattern:monthPattern.value,months};let i=committees.findIndex(x=>x.id==d.id);if(i>=0)committees[i]=d;else committees.push(d);persist();clearForm();renderAll()}
+function editCommittee(id){let c=committees.find(x=>x.id==id);editId.value=c.id;name.value=c.name;type.value=c.type;week.value=c.week;dow.value=c.dow;time.value=c.time;end.value=c.end;memo.value=c.memo;monthPattern.value=c.monthPattern||"all";toggleCustomMonths();document.querySelectorAll(".mcheck").forEach(x=>x.checked=(c.months||[]).map(Number).includes(Number(x.value)));showView("regular",document.querySelectorAll(".tabs button")[1])}
+function deleteCommittee(id){if(confirm("削除しますか？")){committees=committees.filter(x=>x.id!=id);persist();renderAll()}}
+function clearForm(){editId.value=name.value=time.value=end.value=memo.value="";type.value="委員会";week.value=2;dow.value=2;monthPattern.value="all";toggleCustomMonths();document.querySelectorAll(".mcheck").forEach(x=>x.checked=false)}
+function saveSingle(){let d={id:singleEditId.value||uid(),date:singleDate.value,name:singleName.value,type:singleType.value,role:singleRole.value,time:singleTime.value,end:singleEnd.value,memo:singleMemo.value};if(!d.date||!d.name)return alert("日付と名称を入力");let i=singles.findIndex(x=>x.id==d.id);if(i>=0)singles[i]=d;else singles.push(d);persist();clearSingle();renderAll()}
+function editSingle(id){let s=singles.find(x=>x.id==id);singleEditId.value=s.id;singleDate.value=s.date;singleName.value=s.name;singleType.value=s.type;singleRole.value=s.role||"";singleTime.value=s.time;singleEnd.value=s.end;singleMemo.value=s.memo;showView("single",document.querySelectorAll(".tabs button")[2])}
+function deleteSingle(id){if(confirm("削除しますか？")){singles=singles.filter(x=>x.id!=id);persist();renderAll()}}
+function clearSingle(){singleEditId.value=singleDate.value=singleName.value=singleTime.value=singleEnd.value=singleMemo.value="";singleType.value="研修";singleRole.value=""}
+function saveTask(){let d={id:taskEditId.value||uid(),title:taskTitle.value,committeeId:taskCommittee.value,due:taskDue.value,priority:taskPriority.value,status:taskStatus.value,memo:taskMemo.value};if(!d.title)return alert("内容を入力");let i=tasks.findIndex(x=>x.id==d.id);if(i>=0)tasks[i]=d;else tasks.push(d);persist();clearTask();renderAll()}
+function editTask(id){let t=tasks.find(x=>x.id==id);taskEditId.value=t.id;taskTitle.value=t.title;taskCommittee.value=t.committeeId||"";taskDue.value=t.due||"";taskPriority.value=t.priority;taskStatus.value=t.status;taskMemo.value=t.memo||"";showView("tasks",document.querySelectorAll(".tabs button")[3])}
+function toggleTaskDone(id){let t=tasks.find(x=>x.id==id);t.status=t.status==="完了"?"未着手":"完了";persist();renderAll()}
+function deleteTask(id){if(confirm("削除しますか？")){tasks=tasks.filter(x=>x.id!=id);persist();renderAll()}}
+function clearTask(){taskEditId.value=taskTitle.value=taskDue.value=taskMemo.value="";taskCommittee.value="";taskPriority.value="A";taskStatus.value="未着手"}
+function saveMinute(makeTasks){let m={id:uid(),targetId:minuteTarget.value,date:minuteDate.value,text:minuteText.value,actions:minuteActions.value};minutes.push(m);if(makeTasks){minuteActions.value.split(/\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>tasks.push({id:uid(),title:line,committeeId:minuteTarget.value,due:"",priority:"A",status:"未着手",memo:"議事録から追加"}));}minuteText.value=minuteActions.value=minuteDate.value="";persist();renderAll()}
+function deleteMinute(id){if(confirm("削除しますか？")){minutes=minutes.filter(x=>x.id!=id);persist();renderAll()}}
+
+
+function parseOCR(){
+  const text=document.getElementById("ocrText").value;
+  const rawLines=text.split(/\n/).map(x=>x.trim()).filter(Boolean);
+  const defaultYear=Number(document.getElementById("year").value)||new Date().getFullYear();
+  const candidates=[];
+
+  for(let i=0;i<rawLines.length;i++){
+    const line=rawLines[i];
+
+    /*
+      重要：
+      タイトル内の「9/9」「15/21」「21/21」を日付と誤認識しないため、
+      日付行は必ず「行頭」から始まるものだけ認識する。
+      OK:
+        2026/07/06 09:05-12:15
+        7/6 09:05-12:15
+        7月6日 09:05-12:15
+      NG:
+        実習指導方法論9/9 看護教育係長③
+    */
+    const m=line.match(/^\s*(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*(\d{1,2})(?:月|[\/\.\-])\s*(\d{1,2})(?:日)?\s*(?:(\d{1,2})[:：](\d{2})\s*[〜～\-–]\s*(\d{1,2})[:：](\d{2}))?\s*(.*)$/i);
+    if(!m) continue;
+
+    let yy=defaultYear;
+    if(m[1]){
+      if(m[1].startsWith("20")) yy=Number(m[1]);
+      else yy=2018+Number(m[1].replace(/[^\d]/g,""));
+    }
+
+    const mmNum=Number(m[2]);
+    const ddNum=Number(m[3]);
+
+    // 月日としてありえないものは捨てる
+    if(mmNum < 1 || mmNum > 12 || ddNum < 1 || ddNum > 31) continue;
+
+    const mm=String(mmNum).padStart(2,"0");
+    const dd=String(ddNum).padStart(2,"0");
+    const startTime=m[4]?`${String(Number(m[4])).padStart(2,"0")}:${m[5]}`:"";
+    const endTime=m[6]?`${String(Number(m[6])).padStart(2,"0")}:${m[7]}`:"";
+
+    let title=(m[8]||"").trim();
+
+    // 同じ行にタイトルがなければ次の行をタイトルとして使う
+    if(!title && rawLines[i+1]){
+      const next=rawLines[i+1].trim();
+      const nextIsDate=next.match(/^\s*(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*\d{1,2}(?:月|[\/\.\-])\s*\d{1,2}(?:日)?\s*(?:\d{1,2}[:：]\d{2})?/i);
+      if(!nextIsDate){
+        title=next;
+        i++;
+      }
+    }
+
+    if(!title) title="予定";
+    const category=/研修|講習|講座|演習|講義|閉講式|開講式|オリエンテーション/.test(title)
+      ?"研修"
+      :(/委員会/.test(title)?"委員会":(/部会/.test(title)?"部会":"会議"));
+
+    candidates.push({
+      date:`${yy}-${mm}-${dd}`,
+      title,
+      startTime,
+      endTime,
+      category,
+      memo:"OCR取込"
+    });
+  }
+
+  if(!candidates.length){
+    document.getElementById("ocrCandidates").innerHTML="<div class='warn'>候補なし。例：2026/07/06 09:05-12:15 の次行に研修名を入れると拾えます。</div>";
+    return;
+  }
+
+  document.getElementById("ocrCandidates").innerHTML =
+    candidates.map((c,i)=>`
+      <div class="event">
+        <label><input type="checkbox" class="pick" data-i="${i}" checked> 追加</label>
+        <label>日付</label><input id="od${i}" value="${c.date}">
+        <label>名称</label><input id="on${i}" value="${escapeHtml(c.title)}">
+        <div class="row">
+          <div style="flex:1"><label>開始時刻</label><input id="ost${i}" value="${c.startTime}" type="time"></div>
+          <div style="flex:1"><label>終了時刻</label><input id="oet${i}" value="${c.endTime}" type="time"></div>
+        </div>
+        <label>種別</label>
+        <select id="op${i}">
+          <option ${c.category==="研修"?"selected":""}>研修</option>
+          <option ${c.category==="委員会"?"selected":""}>委員会</option>
+          <option ${c.category==="部会"?"selected":""}>部会</option>
+          <option ${c.category==="会議"?"selected":""}>会議</option>
+          <option>私用</option>
+          <option>その他</option>
+        </select>
+        <label>メモ</label><input id="om${i}" value="${c.memo}">
+      </div>`).join("")+
+    `<button class="ok" onclick="addOCR(${candidates.length})">選択分を追加</button>`;
+}
+
+function hasTimeOverlap(date,start,end,ignoreId=""){
+  if(!date || !start || !end) return [];
+  const all = [
+    ...singles.map(s=>({id:s.id,date:s.date,name:s.name,start:s.time||s.startTime||"",end:s.end||s.endTime||""}))
+  ];
+  return all.filter(x=>{
+    if(x.id===ignoreId || x.date!==date || !x.start || !x.end) return false;
+    return start < x.end && end > x.start;
+  });
+}
+
+function addOCR(n){
+  let added=0;
+  let overlaps=[];
+  for(let i=0;i<n;i++){
+    const cb=document.querySelector(`.pick[data-i="${i}"]`);
+    if(!cb||!cb.checked) continue;
+    const date=document.getElementById(`od${i}`).value;
+    const name=document.getElementById(`on${i}`).value;
+    const time=document.getElementById(`ost${i}`).value;
+    const end=document.getElementById(`oet${i}`).value;
+    const type=document.getElementById(`op${i}`).value;
+    const memo=document.getElementById(`om${i}`).value;
+    const hit=hasTimeOverlap(date,time,end);
+    if(hit.length) overlaps.push(`${date} ${time}-${end} ${name}`);
+    let role="";
+    if(type==="研修" && /講師|担当|ファシリテーター/.test(name+memo)){
+      if(/講師/.test(name+memo)) role="講師";
+      else if(/ファシリテーター/.test(name+memo)) role="ファシリテーター";
+      else role="担当";
+    }else if(type==="研修"){
+      role="受講";
+    }
+    singles.push({id:uid(),date,name,type,role,time,end,memo});
+    added++;
+  }
+  persist();renderAll();
+  if(overlaps.length){
+    alert(`追加しました。ただし予定が重複しています。\n\n${overlaps.join("\n")}`);
+  }else{
+    alert(`${added}件追加しました`);
+  }
+}
+
+function exportJson(){let blob=new Blob([JSON.stringify({committees,singles,tasks,minutes},null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="natsumi_secretary_backup.json";a.click()}
+function importJson(){let inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=e=>{let r=new FileReader();r.onload=()=>{let d=JSON.parse(r.result);committees=d.committees||committees;singles=d.singles||singles;tasks=d.tasks||tasks;minutes=d.minutes||minutes;normalize();persist();renderAll()};r.readAsText(e.target.files[0])};inp.click()}
+function jumpToday(){let now=new Date();year.value=now.getFullYear();month.value=now.getMonth()+1;renderAll()}
+function allTargets(){return [...committees.map(x=>({...x,targetType:"regular"})),...singles.map(x=>({...x,targetType:"single"}))]}
+function initMonthChecks(){customMonths.innerHTML="";for(let i=1;i<=12;i++){customMonths.innerHTML+=`<label><input class="mcheck" type="checkbox" value="${i}">${i}月</label>`}}
+function toggleCustomMonths(){customMonthsBox.style.display=monthPattern.value==="custom"?"block":"none"}
+function init(){initMonthChecks();let now=new Date();for(let yy=2026;yy<=2028;yy++)year.innerHTML+=`<option ${yy==now.getFullYear()?"selected":""}>${yy}</option>`;for(let mm=1;mm<=12;mm++)month.innerHTML+=`<option value="${mm}" ${mm==now.getMonth()+1?"selected":""}>${mm}月</option>`;mergeDefaults();persist();renderAll();if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
+init();
+</script>
+</body>
+</html>
