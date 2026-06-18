@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="夏海秘書">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
-<title>夏海秘書アプリ Ver5</title>
+<title>夏海秘書アプリ Ver5.1</title>
 <style>
 :root{--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--main:#2563eb;--line:#e2e8f0;--danger:#dc2626;--ok:#16a34a;--warn:#f59e0b;--dark:#0f172a}
 *{box-sizing:border-box}
@@ -46,7 +46,7 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 </style>
 </head>
 <body>
-<header><h1>夏海秘書アプリ Ver5</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
+<header><h1>夏海秘書アプリ Ver5.1</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
 <main>
 <section id="home" class="view active">
  <div class="card"><h2>表示月</h2><div class="row"><select id="year"></select><select id="month"></select><button class="primary" onclick="renderAll()">更新</button><button class="ghost" onclick="jumpToday()">今月</button></div></div>
@@ -108,7 +108,7 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 <nav class="tabs"><button class="active" onclick="showView('home',this)">予定</button><button onclick="showView('regular',this)">委員会</button><button onclick="showView('single',this)">研修</button><button onclick="showView('tasks',this)">宿題</button><button onclick="showView('minutes',this)">議事録</button><button onclick="showView('ocr',this)">取込</button></nav>
 
 <script>
-const APP_VERSION="5.0";
+const APP_VERSION="5.1";
 function uid(){return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())}
 const defaultData=[
 {id:uid(),name:"特定行為に関する検討委員会",type:"委員会",week:2,dow:2,time:"16:00",end:"",memo:"5月以降",monthPattern:"all",months:[]},
@@ -185,19 +185,28 @@ function clearTask(){taskEditId.value=taskTitle.value=taskDue.value=taskMemo.val
 function saveMinute(makeTasks){let m={id:uid(),targetId:minuteTarget.value,date:minuteDate.value,text:minuteText.value,actions:minuteActions.value};minutes.push(m);if(makeTasks){minuteActions.value.split(/\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>tasks.push({id:uid(),title:line,committeeId:minuteTarget.value,due:"",priority:"A",status:"未着手",memo:"議事録から追加"}));}minuteText.value=minuteActions.value=minuteDate.value="";persist();renderAll()}
 function deleteMinute(id){if(confirm("削除しますか？")){minutes=minutes.filter(x=>x.id!=id);persist();renderAll()}}
 
+
 function parseOCR(){
   const text=document.getElementById("ocrText").value;
   const rawLines=text.split(/\n/).map(x=>x.trim()).filter(Boolean);
   const defaultYear=Number(document.getElementById("year").value)||new Date().getFullYear();
   const candidates=[];
+
   for(let i=0;i<rawLines.length;i++){
     const line=rawLines[i];
 
-    // Supported:
-    // 2026/07/06 09:05-12:15
-    // 2026/7/6 9:05～12:15 研修名
-    // 7/6 09:05-12:15
-    const m=line.match(/(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*(\d{1,2})[月\/\.\-]\s*(\d{1,2})日?\s*(?:(\d{1,2})[:：](\d{2})\s*[〜～\-–]\s*(\d{1,2})[:：](\d{2}))?/i);
+    /*
+      重要：
+      タイトル内の「9/9」「15/21」「21/21」を日付と誤認識しないため、
+      日付行は必ず「行頭」から始まるものだけ認識する。
+      OK:
+        2026/07/06 09:05-12:15
+        7/6 09:05-12:15
+        7月6日 09:05-12:15
+      NG:
+        実習指導方法論9/9 看護教育係長③
+    */
+    const m=line.match(/^\s*(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*(\d{1,2})(?:月|[\/\.\-])\s*(\d{1,2})(?:日)?\s*(?:(\d{1,2})[:：](\d{2})\s*[〜～\-–]\s*(\d{1,2})[:：](\d{2}))?\s*(.*)$/i);
     if(!m) continue;
 
     let yy=defaultYear;
@@ -205,22 +214,34 @@ function parseOCR(){
       if(m[1].startsWith("20")) yy=Number(m[1]);
       else yy=2018+Number(m[1].replace(/[^\d]/g,""));
     }
-    const mm=String(Number(m[2])).padStart(2,"0");
-    const dd=String(Number(m[3])).padStart(2,"0");
+
+    const mmNum=Number(m[2]);
+    const ddNum=Number(m[3]);
+
+    // 月日としてありえないものは捨てる
+    if(mmNum < 1 || mmNum > 12 || ddNum < 1 || ddNum > 31) continue;
+
+    const mm=String(mmNum).padStart(2,"0");
+    const dd=String(ddNum).padStart(2,"0");
     const startTime=m[4]?`${String(Number(m[4])).padStart(2,"0")}:${m[5]}`:"";
     const endTime=m[6]?`${String(Number(m[6])).padStart(2,"0")}:${m[7]}`:"";
 
-    let sameLineTitle=line.replace(m[0],"").trim();
-    let title=sameLineTitle;
+    let title=(m[8]||"").trim();
 
-    // If title is blank, use following non-date line as title
-    if(!title && rawLines[i+1] && !rawLines[i+1].match(/(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*\d{1,2}[月\/\.\-]\s*\d{1,2}日?/i)){
-      title=rawLines[i+1].trim();
-      i++;
+    // 同じ行にタイトルがなければ次の行をタイトルとして使う
+    if(!title && rawLines[i+1]){
+      const next=rawLines[i+1].trim();
+      const nextIsDate=next.match(/^\s*(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*\d{1,2}(?:月|[\/\.\-])\s*\d{1,2}(?:日)?\s*(?:\d{1,2}[:：]\d{2})?/i);
+      if(!nextIsDate){
+        title=next;
+        i++;
+      }
     }
 
     if(!title) title="予定";
-    let category=/研修|講習|講座|演習|講義|閉講式|開講式|オリエンテーション/.test(title)?"研修":(/委員会/.test(title)?"委員会":(/部会/.test(title)?"部会":"会議"));
+    const category=/研修|講習|講座|演習|講義|閉講式|開講式|オリエンテーション/.test(title)
+      ?"研修"
+      :(/委員会/.test(title)?"委員会":(/部会/.test(title)?"部会":"会議"));
 
     candidates.push({
       date:`${yy}-${mm}-${dd}`,
