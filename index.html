@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="委員会管理">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<title>委員会管理</title>
+<style>
+:root{--bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;--main:#2563eb;--line:#e5e7eb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:5;background:#111827;color:white;padding:14px 16px calc(12px + env(safe-area-inset-top));box-shadow:0 2px 10px #0003}
+h1{font-size:20px;margin:0}.sub{font-size:12px;color:#d1d5db;margin-top:3px}
+main{padding:12px;max-width:720px;margin:auto;padding-bottom:80px}
+.card{background:var(--card);border-radius:16px;padding:14px;margin:0 0 12px;box-shadow:0 2px 10px #0001}
+h2{font-size:17px;margin:0 0 10px}
+h3{font-size:15px;margin:14px 0 8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;background:white}
+label{display:block;font-size:12px;color:#374151;margin:10px 0 4px}
+textarea{min-height:96px}
+button{border:0;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px}
+.primary{background:var(--main);color:#fff}.ghost{background:#e5e7eb}.danger{background:#dc2626;color:#fff}.ok{background:#16a34a;color:#fff}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:10}
+.tabs button{border-radius:0;background:white;color:#374151;padding:10px 2px;font-size:12px}
+.tabs button.active{color:#2563eb;background:#eff6ff}
+.view{display:none}.view.active{display:block}
+.event{border:1px solid var(--line);border-radius:14px;padding:11px;margin:8px 0;background:#fff}
+.event .date{font-weight:800}.event .meta{color:var(--muted);font-size:13px;margin-top:2px}
+.tag{display:inline-block;border-radius:999px;padding:2px 8px;font-size:12px;background:#eef2ff;color:#3730a3;margin-right:4px}
+.small{font-size:12px;color:var(--muted)}
+.warn{background:#fff7ed;border:1px solid #fed7aa;padding:10px;border-radius:12px;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f9fafb}
+.actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+@media(min-width:720px){main{padding-top:18px}.tabs{max-width:720px;margin:auto;left:50%;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>委員会管理</h1>
+  <div class="sub">PWA / オフライン対応 / 端末保存</div>
+</header>
+
+<main>
+<section id="home" class="view active">
+  <div class="card">
+    <h2>表示月</h2>
+    <div class="row">
+      <select id="year"></select>
+      <select id="month"></select>
+      <button class="primary" onclick="renderAll()">更新</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>今月の予定</h2>
+    <div id="monthList"></div>
+  </div>
+  <div class="card">
+    <h2>勤務希望候補</h2>
+    <button class="ok" onclick="copyWorkRequests()">勤務希望日をコピー</button>
+    <div id="workList"></div>
+  </div>
+</section>
+
+<section id="regular" class="view">
+  <div class="card">
+    <h2>定例予定</h2>
+    <div id="regularList"></div>
+  </div>
+  <div class="card">
+    <h2>定例を追加・編集</h2>
+    <input type="hidden" id="editId">
+    <label>名称</label><input id="name">
+    <label>種別</label><select id="type"><option>委員会</option><option>部会</option><option>会議</option><option>研修</option><option>私用</option></select>
+    <div class="row">
+      <div style="flex:1"><label>開催週</label><select id="week"><option value="1">第1</option><option value="2">第2</option><option value="3">第3</option><option value="4">第4</option><option value="5">第5</option></select></div>
+      <div style="flex:1"><label>曜日</label><select id="dow"><option value="1">月</option><option value="2">火</option><option value="3">水</option><option value="4">木</option><option value="5">金</option><option value="6">土</option><option value="0">日</option></select></div>
+    </div>
+    <div class="row">
+      <div style="flex:1"><label>開始</label><input id="time" type="time"></div>
+      <div style="flex:1"><label>終了</label><input id="end" type="time"></div>
+    </div>
+    <label>メモ</label><textarea id="memo"></textarea>
+    <div class="actions"><button class="primary" onclick="saveCommittee()">保存</button><button class="ghost" onclick="clearForm()">クリア</button></div>
+  </div>
+</section>
+
+<section id="single" class="view">
+  <div class="card">
+    <h2>研修・単発予定</h2>
+    <div id="singleList"></div>
+  </div>
+  <div class="card">
+    <h2>単発予定を追加・編集</h2>
+    <input type="hidden" id="singleEditId">
+    <label>日付</label><input id="singleDate" type="date">
+    <label>名称</label><input id="singleName">
+    <label>種別</label><select id="singleType"><option>研修</option><option>委員会</option><option>部会</option><option>会議</option><option>私用</option></select>
+    <div class="row">
+      <div style="flex:1"><label>開始</label><input id="singleTime" type="time"></div>
+      <div style="flex:1"><label>終了</label><input id="singleEnd" type="time"></div>
+    </div>
+    <label>メモ</label><textarea id="singleMemo"></textarea>
+    <div class="actions"><button class="primary" onclick="saveSingle()">保存</button><button class="ghost" onclick="clearSingle()">クリア</button></div>
+  </div>
+</section>
+
+<section id="ocr" class="view">
+  <div class="card">
+    <h2>画像から予定追加</h2>
+    <div class="warn">スマホのブラウザ単体での高精度OCRは不安定なので、このPWAでは「画像を見ながらテキスト貼り付け・候補化」を基本にしています。iPhoneの写真アプリやGoogleレンズで文字コピー → ここに貼るのが実用的。</div>
+    <label>読み取ったテキスト</label>
+    <textarea id="ocrText" placeholder="例：7月29日 レベル2急変時研修 担当"></textarea>
+    <button class="primary" onclick="parseOCR()">候補を作成</button>
+    <div id="ocrCandidates"></div>
+  </div>
+</section>
+
+<section id="data" class="view">
+  <div class="card">
+    <h2>バックアップ</h2>
+    <button class="primary" onclick="exportJson()">バックアップ保存</button>
+    <button class="ghost" onclick="importJson()">復元</button>
+    <p class="small">アップデート前は必ずバックアップ。新しい版を開いた後に復元すれば予定が戻る。</p>
+  </div>
+  <div class="card">
+    <h2>ホーム画面に追加</h2>
+    <p class="small">iPhone: Safariで開く → 共有 → ホーム画面に追加。Android: Chromeで開く → メニュー → ホーム画面に追加。</p>
+  </div>
+</section>
+</main>
+
+<nav class="tabs">
+  <button class="active" onclick="showView('home',this)">予定</button>
+  <button onclick="showView('regular',this)">定例</button>
+  <button onclick="showView('single',this)">研修</button>
+  <button onclick="showView('ocr',this)">取込</button>
+  <button onclick="showView('data',this)">保存</button>
+</nav>
+
+<script>
+const defaultData=[
+{id:crypto.randomUUID(),name:"特定行為に関する検討委員会",type:"委員会",week:2,dow:2,time:"16:00",end:"",memo:"5月以降"},
+{id:crypto.randomUUID(),name:"リスク部会班会議（薬剤班）",type:"部会",week:2,dow:3,time:"16:00",end:"",memo:""},
+{id:crypto.randomUUID(),name:"リスクマネジメント会議",type:"会議",week:2,dow:4,time:"14:00",end:"",memo:""},
+{id:crypto.randomUUID(),name:"副師長会議",type:"会議",week:2,dow:4,time:"15:00",end:"",memo:""},
+{id:crypto.randomUUID(),name:"看護部広報委員会",type:"委員会",week:2,dow:5,time:"15:00",end:"16:00",memo:""},
+{id:crypto.randomUUID(),name:"クリニカルパス委員会",type:"委員会",week:3,dow:4,time:"15:00",end:"16:00",memo:""},
+{id:crypto.randomUUID(),name:"SNS部会",type:"部会",week:3,dow:4,time:"16:30",end:"",memo:""},
+{id:crypto.randomUUID(),name:"広報部会",type:"部会",week:4,dow:2,time:"",end:"",memo:""},
+{id:crypto.randomUUID(),name:"フットサル",type:"私用",week:4,dow:4,time:"20:00",end:"",memo:""}
+];
+const defaultSingles=[
+{id:crypto.randomUUID(),date:"2026-07-29",name:"レベル2急変時研修",type:"研修",time:"",end:"",memo:"担当"},
+{id:crypto.randomUUID(),date:"2026-09-03",name:"コース研修",type:"研修",time:"",end:"",memo:"担当"},
+{id:crypto.randomUUID(),date:"2026-09-28",name:"レベル1急変時研修",type:"研修",time:"",end:"",memo:"ファシリテーター"},
+{id:crypto.randomUUID(),date:"2026-11-05",name:"レベル別急変対応コース研修",type:"研修",time:"",end:"",memo:""},
+{id:crypto.randomUUID(),date:"2026-11-16",name:"急変対応コース研修",type:"研修",time:"",end:"",memo:""},
+{id:crypto.randomUUID(),date:"2027-01-27",name:"急変対応コース研修",type:"研修",time:"",end:"",memo:""}
+];
+let committees=JSON.parse(localStorage.getItem("committees")||"null")||defaultData;
+let singles=JSON.parse(localStorage.getItem("singles")||"null")||defaultSingles;
+function persist(){localStorage.setItem("committees",JSON.stringify(committees));localStorage.setItem("singles",JSON.stringify(singles));}
+function showView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));btn.classList.add("active");}
+function nthDow(y,m,n,dow){let d=new Date(y,m-1,1),c=0;while(d.getMonth()==m-1){if(d.getDay()==Number(dow)){c++;if(c==Number(n))return new Date(d)}d.setDate(d.getDate()+1)}return null}
+function jpDow(d){return"日月火水木金土"[d.getDay()]}
+function getMonthRows(y,m){let r=committees.map(c=>({...c,date:nthDow(y,m,c.week,c.dow),kind:"定例"})).filter(x=>x.date);let s=singles.map(x=>({...x,date:new Date(x.date+"T00:00:00"),kind:"単発"})).filter(x=>x.date.getFullYear()==y&&x.date.getMonth()+1==m);return[...r,...s].sort((a,b)=>a.date-b.date||(a.time||"99").localeCompare(b.time||"99"))}
+function eventCard(e){return`<div class="event"><div class="date">${e.date.getMonth()+1}/${e.date.getDate()}（${jpDow(e.date)}） ${e.time||""}${e.end?"–"+e.end:""}</div><div><span class="tag">${e.type}</span>${e.name}</div><div class="meta">${e.memo||""}</div></div>`}
+function renderAll(){renderMonth();renderRegular();renderSingle();renderWork();}
+function renderMonth(){let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m);monthList.innerHTML=rows.length?rows.map(eventCard).join(""):"予定なし"}
+function renderWork(){let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m).filter(x=>["委員会","部会","会議","研修"].includes(x.type));workList.innerHTML=rows.map(eventCard).join("")}
+function copyWorkRequests(){let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m).filter(x=>["委員会","部会","会議","研修"].includes(x.type));let text=rows.map(x=>`${x.date.getMonth()+1}/${x.date.getDate()}（${jpDow(x.date)}） ${x.time||""} ${x.name}`).join("\n");navigator.clipboard.writeText(text);alert("コピーしました")}
+function renderRegular(){regularList.innerHTML=committees.map(c=>`<div class="event"><b>${c.name}</b><div class="meta"><span class="tag">${c.type}</span>第${c.week}${"日月火水木金土"[c.dow]}曜 ${c.time||""}${c.end?"–"+c.end:""}</div><div class="actions"><button class="ghost" onclick="editCommittee('${c.id}')">編集</button><button class="danger" onclick="deleteCommittee('${c.id}')">削除</button></div></div>`).join("")}
+function renderSingle(){singleList.innerHTML=singles.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>`<div class="event"><b>${s.date} ${s.name}</b><div class="meta"><span class="tag">${s.type}</span>${s.time||""}${s.end?"–"+s.end:""} ${s.memo||""}</div><div class="actions"><button class="ghost" onclick="editSingle('${s.id}')">編集</button><button class="danger" onclick="deleteSingle('${s.id}')">削除</button></div></div>`).join("")}
+function saveCommittee(){let d={id:editId.value||crypto.randomUUID(),name:name.value,type:type.value,week:Number(week.value),dow:Number(dow.value),time:time.value,end:end.value,memo:memo.value};if(!d.name)return alert("名称を入力");let i=committees.findIndex(x=>x.id==d.id);if(i>=0)committees[i]=d;else committees.push(d);persist();clearForm();renderAll()}
+function editCommittee(id){let c=committees.find(x=>x.id==id);editId.value=c.id;name.value=c.name;type.value=c.type;week.value=c.week;dow.value=c.dow;time.value=c.time;end.value=c.end;memo.value=c.memo;showView("regular",document.querySelectorAll(".tabs button")[1])}
+function deleteCommittee(id){if(confirm("削除しますか？")){committees=committees.filter(x=>x.id!=id);persist();renderAll()}}
+function clearForm(){editId.value=name.value=time.value=end.value=memo.value="";type.value="委員会";week.value=2;dow.value=2}
+function saveSingle(){let d={id:singleEditId.value||crypto.randomUUID(),date:singleDate.value,name:singleName.value,type:singleType.value,time:singleTime.value,end:singleEnd.value,memo:singleMemo.value};if(!d.date||!d.name)return alert("日付と名称を入力");let i=singles.findIndex(x=>x.id==d.id);if(i>=0)singles[i]=d;else singles.push(d);persist();clearSingle();renderAll()}
+function editSingle(id){let s=singles.find(x=>x.id==id);singleEditId.value=s.id;singleDate.value=s.date;singleName.value=s.name;singleType.value=s.type;singleTime.value=s.time;singleEnd.value=s.end;singleMemo.value=s.memo;showView("single",document.querySelectorAll(".tabs button")[2])}
+function deleteSingle(id){if(confirm("削除しますか？")){singles=singles.filter(x=>x.id!=id);persist();renderAll()}}
+function clearSingle(){singleEditId.value=singleDate.value=singleName.value=singleTime.value=singleEnd.value=singleMemo.value="";singleType.value="研修"}
+function parseOCR(){let text=ocrText.value,lines=text.split(/\n/).map(x=>x.trim()).filter(Boolean),y=Number(year.value),cs=[];for(let line of lines){let m=line.match(/(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*(\d{1,2})[月\/\.\-]\s*(\d{1,2})日?/i);if(!m)continue;let yy=y;if(m[1]){if(m[1].startsWith("20"))yy=Number(m[1]);else yy=2018+Number(m[1].replace(/[^\d]/g,""))}let mm=String(Number(m[2])).padStart(2,"0"),dd=String(Number(m[3])).padStart(2,"0");let tm=line.match(/(\d{1,2})[:：](\d{2})/);let t=tm?`${String(Number(tm[1])).padStart(2,"0")}:${tm[2]}`:"";let clean=line.replace(m[0],"").replace(/(\d{1,2})[:：](\d{2})/,"").trim();let tp=/研修|講習|講座/.test(clean)?"研修":/委員会/.test(clean)?"委員会":/部会/.test(clean)?"部会":"会議";cs.push({date:`${yy}-${mm}-${dd}`,name:clean||line,type:tp,time:t})}ocrCandidates.innerHTML=cs.length?cs.map((c,i)=>`<div class="event"><label><input type="checkbox" class="pick" data-i="${i}" checked> 追加</label><input id="od${i}" value="${c.date}"><input id="on${i}" value="${c.name}"><input id="ot${i}" value="${c.time}"><input id="op${i}" value="${c.type}"></div>`).join("")+`<button class="ok" onclick="addOCR(${cs.length})">選択分を追加</button>`:"<div class='warn'>候補なし</div>"}
+function addOCR(n){for(let i=0;i<n;i++){let cb=document.querySelector(`.pick[data-i="${i}"]`);if(cb&&cb.checked)singles.push({id:crypto.randomUUID(),date:document.getElementById(`od${i}`).value,name:document.getElementById(`on${i}`).value,type:document.getElementById(`op${i}`).value,time:document.getElementById(`ot${i}`).value,end:"",memo:"取込"})}persist();renderAll();alert("追加しました")}
+function exportJson(){let blob=new Blob([JSON.stringify({committees,singles},null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="committee_backup.json";a.click()}
+function importJson(){let inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=e=>{let r=new FileReader();r.onload=()=>{let d=JSON.parse(r.result);committees=d.committees||committees;singles=d.singles||singles;persist();renderAll()};r.readAsText(e.target.files[0])};inp.click()}
+function init(){let now=new Date();for(let yy=2026;yy<=2028;yy++)year.innerHTML+=`<option ${yy==now.getFullYear()?"selected":""}>${yy}</option>`;for(let mm=1;mm<=12;mm++)month.innerHTML+=`<option value="${mm}" ${mm==now.getMonth()+1?"selected":""}>${mm}月</option>`;renderAll();if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js")}
+init();
+</script>
+</body>
+</html>
