@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="夏海秘書">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
-<title>夏海秘書アプリ Ver4.1</title>
+<title>夏海秘書アプリ Ver5</title>
 <style>
 :root{--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--main:#2563eb;--line:#e2e8f0;--danger:#dc2626;--ok:#16a34a;--warn:#f59e0b;--dark:#0f172a}
 *{box-sizing:border-box}
@@ -46,7 +46,7 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 </style>
 </head>
 <body>
-<header><h1>夏海秘書アプリ Ver4.1</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
+<header><h1>夏海秘書アプリ Ver5</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
 <main>
 <section id="home" class="view active">
  <div class="card"><h2>表示月</h2><div class="row"><select id="year"></select><select id="month"></select><button class="primary" onclick="renderAll()">更新</button><button class="ghost" onclick="jumpToday()">今月</button></div></div>
@@ -108,7 +108,7 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 <nav class="tabs"><button class="active" onclick="showView('home',this)">予定</button><button onclick="showView('regular',this)">委員会</button><button onclick="showView('single',this)">研修</button><button onclick="showView('tasks',this)">宿題</button><button onclick="showView('minutes',this)">議事録</button><button onclick="showView('ocr',this)">取込</button></nav>
 
 <script>
-const APP_VERSION="4.1";
+const APP_VERSION="5.0";
 function uid(){return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())}
 const defaultData=[
 {id:uid(),name:"特定行為に関する検討委員会",type:"委員会",week:2,dow:2,time:"16:00",end:"",memo:"5月以降",monthPattern:"all",months:[]},
@@ -184,8 +184,119 @@ function deleteTask(id){if(confirm("削除しますか？")){tasks=tasks.filter(
 function clearTask(){taskEditId.value=taskTitle.value=taskDue.value=taskMemo.value="";taskCommittee.value="";taskPriority.value="A";taskStatus.value="未着手"}
 function saveMinute(makeTasks){let m={id:uid(),targetId:minuteTarget.value,date:minuteDate.value,text:minuteText.value,actions:minuteActions.value};minutes.push(m);if(makeTasks){minuteActions.value.split(/\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>tasks.push({id:uid(),title:line,committeeId:minuteTarget.value,due:"",priority:"A",status:"未着手",memo:"議事録から追加"}));}minuteText.value=minuteActions.value=minuteDate.value="";persist();renderAll()}
 function deleteMinute(id){if(confirm("削除しますか？")){minutes=minutes.filter(x=>x.id!=id);persist();renderAll()}}
-function parseOCR(){let text=ocrText.value,lines=text.split(/\n/).map(x=>x.trim()).filter(Boolean),y=Number(year.value),cs=[];for(let line of lines){let m=line.match(/(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*(\d{1,2})[月\/\.\-]\s*(\d{1,2})日?/i);if(!m)continue;let yy=y;if(m[1]){if(m[1].startsWith("20"))yy=Number(m[1]);else yy=2018+Number(m[1].replace(/[^\d]/g,""))}let mm=String(Number(m[2])).padStart(2,"0"),dd=String(Number(m[3])).padStart(2,"0");let tm=line.match(/(\d{1,2})[:：](\d{2})/);let t=tm?`${String(Number(tm[1])).padStart(2,"0")}:${tm[2]}`:"";let clean=line.replace(m[0],"").replace(/(\d{1,2})[:：](\d{2})/,"").trim();let tp=/研修|講習|講座/.test(clean)?"研修":/委員会/.test(clean)?"委員会":/部会/.test(clean)?"部会":"会議";cs.push({date:`${yy}-${mm}-${dd}`,name:clean||line,type:tp,time:t})}ocrCandidates.innerHTML=cs.length?cs.map((c,i)=>`<div class="event"><label><input type="checkbox" class="pick" data-i="${i}" checked> 追加</label><label>日付</label><input id="od${i}" value="${c.date}"><label>名称</label><input id="on${i}" value="${escapeHtml(c.name)}"><label>時刻</label><input id="ot${i}" value="${c.time}"><label>種別</label><input id="op${i}" value="${c.type}"></div>`).join("")+`<button class="ok" onclick="addOCR(${cs.length})">選択分を追加</button>`:"<div class='warn'>候補なし。7/29、7月29日、2026/7/29の形が拾いやすい。</div>"}
-function addOCR(n){for(let i=0;i<n;i++){let cb=document.querySelector(`.pick[data-i="${i}"]`);if(cb&&cb.checked)singles.push({id:uid(),date:document.getElementById(`od${i}`).value,name:document.getElementById(`on${i}`).value,type:document.getElementById(`op${i}`).value,role:"",time:document.getElementById(`ot${i}`).value,end:"",memo:"取込"})}persist();renderAll();alert("追加しました")}
+
+function parseOCR(){
+  const text=document.getElementById("ocrText").value;
+  const rawLines=text.split(/\n/).map(x=>x.trim()).filter(Boolean);
+  const defaultYear=Number(document.getElementById("year").value)||new Date().getFullYear();
+  const candidates=[];
+  for(let i=0;i<rawLines.length;i++){
+    const line=rawLines[i];
+
+    // Supported:
+    // 2026/07/06 09:05-12:15
+    // 2026/7/6 9:05～12:15 研修名
+    // 7/6 09:05-12:15
+    const m=line.match(/(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*(\d{1,2})[月\/\.\-]\s*(\d{1,2})日?\s*(?:(\d{1,2})[:：](\d{2})\s*[〜～\-–]\s*(\d{1,2})[:：](\d{2}))?/i);
+    if(!m) continue;
+
+    let yy=defaultYear;
+    if(m[1]){
+      if(m[1].startsWith("20")) yy=Number(m[1]);
+      else yy=2018+Number(m[1].replace(/[^\d]/g,""));
+    }
+    const mm=String(Number(m[2])).padStart(2,"0");
+    const dd=String(Number(m[3])).padStart(2,"0");
+    const startTime=m[4]?`${String(Number(m[4])).padStart(2,"0")}:${m[5]}`:"";
+    const endTime=m[6]?`${String(Number(m[6])).padStart(2,"0")}:${m[7]}`:"";
+
+    let sameLineTitle=line.replace(m[0],"").trim();
+    let title=sameLineTitle;
+
+    // If title is blank, use following non-date line as title
+    if(!title && rawLines[i+1] && !rawLines[i+1].match(/(?:(20\d{2}|令和\d+|R\d+)[年\/\.\-])?\s*\d{1,2}[月\/\.\-]\s*\d{1,2}日?/i)){
+      title=rawLines[i+1].trim();
+      i++;
+    }
+
+    if(!title) title="予定";
+    let category=/研修|講習|講座|演習|講義|閉講式|開講式|オリエンテーション/.test(title)?"研修":(/委員会/.test(title)?"委員会":(/部会/.test(title)?"部会":"会議"));
+
+    candidates.push({
+      date:`${yy}-${mm}-${dd}`,
+      title,
+      startTime,
+      endTime,
+      category,
+      memo:"OCR取込"
+    });
+  }
+
+  if(!candidates.length){
+    document.getElementById("ocrCandidates").innerHTML="<div class='warn'>候補なし。例：2026/07/06 09:05-12:15 の次行に研修名を入れると拾えます。</div>";
+    return;
+  }
+
+  document.getElementById("ocrCandidates").innerHTML =
+    candidates.map((c,i)=>`
+      <div class="event">
+        <label><input type="checkbox" class="pick" data-i="${i}" checked> 追加</label>
+        <label>日付</label><input id="od${i}" value="${c.date}">
+        <label>名称</label><input id="on${i}" value="${escapeHtml(c.title)}">
+        <div class="row">
+          <div style="flex:1"><label>開始時刻</label><input id="ost${i}" value="${c.startTime}" type="time"></div>
+          <div style="flex:1"><label>終了時刻</label><input id="oet${i}" value="${c.endTime}" type="time"></div>
+        </div>
+        <label>種別</label>
+        <select id="op${i}">
+          <option ${c.category==="研修"?"selected":""}>研修</option>
+          <option ${c.category==="委員会"?"selected":""}>委員会</option>
+          <option ${c.category==="部会"?"selected":""}>部会</option>
+          <option ${c.category==="会議"?"selected":""}>会議</option>
+          <option>私用</option>
+          <option>その他</option>
+        </select>
+        <label>メモ</label><input id="om${i}" value="${c.memo}">
+      </div>`).join("")+
+    `<button class="ok" onclick="addOCR(${candidates.length})">選択分を追加</button>`;
+}
+
+function hasTimeOverlap(date,start,end,ignoreId=""){
+  if(!date || !start || !end) return [];
+  const all = [
+    ...singles.map(s=>({id:s.id,date:s.date,name:s.name,start:s.time||s.startTime||"",end:s.end||s.endTime||""}))
+  ];
+  return all.filter(x=>{
+    if(x.id===ignoreId || x.date!==date || !x.start || !x.end) return false;
+    return start < x.end && end > x.start;
+  });
+}
+
+function addOCR(n){
+  let added=0;
+  let overlaps=[];
+  for(let i=0;i<n;i++){
+    const cb=document.querySelector(`.pick[data-i="${i}"]`);
+    if(!cb||!cb.checked) continue;
+    const date=document.getElementById(`od${i}`).value;
+    const name=document.getElementById(`on${i}`).value;
+    const time=document.getElementById(`ost${i}`).value;
+    const end=document.getElementById(`oet${i}`).value;
+    const type=document.getElementById(`op${i}`).value;
+    const memo=document.getElementById(`om${i}`).value;
+    const hit=hasTimeOverlap(date,time,end);
+    if(hit.length) overlaps.push(`${date} ${time}-${end} ${name}`);
+    singles.push({id:uid(),date,name,type,role:"",time,end,memo});
+    added++;
+  }
+  persist();renderAll();
+  if(overlaps.length){
+    alert(`追加しました。ただし予定が重複しています。\n\n${overlaps.join("\n")}`);
+  }else{
+    alert(`${added}件追加しました`);
+  }
+}
+
 function exportJson(){let blob=new Blob([JSON.stringify({committees,singles,tasks,minutes},null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="natsumi_secretary_backup.json";a.click()}
 function importJson(){let inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=e=>{let r=new FileReader();r.onload=()=>{let d=JSON.parse(r.result);committees=d.committees||committees;singles=d.singles||singles;tasks=d.tasks||tasks;minutes=d.minutes||minutes;normalize();persist();renderAll()};r.readAsText(e.target.files[0])};inp.click()}
 function jumpToday(){let now=new Date();year.value=now.getFullYear();month.value=now.getMonth()+1;renderAll()}
