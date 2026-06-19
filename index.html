@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="夏海秘書">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
-<title>夏海秘書アプリ Ver5.2.2</title>
+<title>夏海秘書アプリ Ver6</title>
 <style>
 :root{--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--main:#2563eb;--line:#e2e8f0;--danger:#dc2626;--ok:#16a34a;--warn:#f59e0b;--dark:#0f172a}
 *{box-sizing:border-box}
@@ -43,6 +43,7 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 .monthGrid label{margin:0;background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:9px;font-size:13px;color:#0f172a;display:flex;gap:4px;align-items:center}
 .monthGrid input{width:auto;min-height:0}
 
+/* Ver5.2 color category */
 .event{border-left:8px solid #94a3b8}
 .event.kind-meeting{border-left-color:#2563eb;background:#eff6ff}
 .event.kind-training-own{border-left-color:#dc2626;background:#fff1f2}
@@ -54,15 +55,46 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 .tag.training-own{background:#fee2e2;color:#991b1b}
 .tag.training-attend{background:#fef9c3;color:#854d0e}
 .tag.private{background:#dcfce7;color:#166534}
+.tag.other{background:#f1f5f9;color:#475569}
 .filterBar{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px}
 .filterBar button{white-space:nowrap;background:#e2e8f0;color:#0f172a}
 .filterBar button.activeFilter{background:#2563eb;color:#fff}
 
 @media(min-width:720px){main{padding-top:18px}.tabs{max-width:880px;margin:auto;left:50%;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0}}
+
+/* Ver5.3 iPhone safe-area fix */
+header{
+  padding-top:calc(18px + env(safe-area-inset-top))!important;
+  padding-bottom:14px!important;
+  min-height:calc(96px + env(safe-area-inset-top))!important;
+}
+main{
+  padding-top:16px!important;
+}
+@supports (padding: max(0px)){
+  header{
+    padding-top:max(34px, calc(18px + env(safe-area-inset-top)))!important;
+  }
+}
+
+
+/* Ver6 calendar/export */
+.calendarGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calHead{font-size:12px;text-align:center;color:#64748b;font-weight:800;padding:4px 0}
+.calCell{min-height:82px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:5px;font-size:12px;overflow:hidden}
+.calDate{font-weight:900;margin-bottom:3px}
+.calItem{border-radius:6px;padding:2px 4px;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+.cal-meeting{background:#dbeafe;color:#1e40af}
+.cal-training-own{background:#fee2e2;color:#991b1b}
+.cal-training-attend{background:#fef9c3;color:#854d0e}
+.cal-private{background:#dcfce7;color:#166534}
+.cal-other{background:#f1f5f9;color:#475569}
+.summaryBox{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;margin-top:8px}
+
 </style>
 </head>
 <body>
-<header><h1>夏海秘書アプリ Ver5.2.2</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
+<header><h1>夏海秘書アプリ Ver6</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
 <main>
 <section id="home" class="view active">
  <div class="card"><h2>表示月</h2><div class="row"><select id="year"></select><select id="month"></select><button class="primary" onclick="renderAll()">更新</button><button class="ghost" onclick="jumpToday()">今月</button></div></div>
@@ -77,7 +109,8 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 <button type="button" onclick="setEventFilter('training-attend',this)">研修受講</button>
 <button type="button" onclick="setEventFilter('private',this)">私用</button>
 </div><div id="monthList"></div></div>
- <div class="card"><h2>勤務希望候補</h2><div class="row"><button class="ok" onclick="copyWorkRequests()">勤務希望日をコピー</button><button class="ghost" onclick="renderWorkText()">テキスト表示</button></div><div id="workText"></div><div id="workList"></div></div>
+ <div class="card"><h2>月カレンダー</h2><div id="calendarGrid"></div></div>
+ <div class="card"><h2>勤務希望候補</h2><div class="row"><button class="ok" onclick="copyWorkRequests()">勤務希望日をコピー</button><button class="ghost" onclick="renderWorkText()">テキスト表示</button><button class="ghost" onclick="copyWorkSummary()">勤務希望集計コピー</button></div><div id="workText"></div><div id="workList"></div></div>
 </section>
 
 <section id="regular" class="view">
@@ -124,14 +157,14 @@ button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1
 
 <section id="ocr" class="view">
  <div class="card"><h2>取込</h2><div class="warn">iPhoneでは写真アプリやGoogleレンズで文字コピー → ここに貼る運用が安定。日付入りの行を候補化します。</div><label>読み取ったテキスト</label><textarea id="ocrText" placeholder="例：7月29日 レベル2急変時研修 担当"></textarea><button class="primary" onclick="parseOCR()">候補を作成</button><div id="ocrCandidates"></div></div>
- <div class="card"><h2>保存・復元</h2><div class="actions"><button class="primary" onclick="exportJson()">バックアップ保存</button><button class="ghost" onclick="importJson()">復元</button><button class="warnbtn" onclick="resetInitialData()">初期データ再投入</button></div><p class="small">アップデート前はバックアップ。新しい版で復元すればデータが戻ります。</p></div>
+ <div class="card"><h2>保存・復元</h2><div class="actions"><button class="primary" onclick="exportJson()">バックアップ保存</button><button class="ok" onclick="exportICloudBackup()">iCloud保存用バックアップ</button><button class="ghost" onclick="exportCSV()">CSV出力</button><button class="ghost" onclick="importJson()">復元</button><button class="warnbtn" onclick="resetInitialData()">初期データ再投入</button></div><p class="small">アップデート前はバックアップ。新しい版で復元すればデータが戻ります。</p></div>
 </section>
 </main>
 
 <nav class="tabs"><button class="active" onclick="showView('home',this)">予定</button><button onclick="showView('regular',this)">委員会</button><button onclick="showView('single',this)">研修</button><button onclick="showView('tasks',this)">宿題</button><button onclick="showView('minutes',this)">議事録</button><button onclick="showView('ocr',this)">取込</button></nav>
 
 <script>
-const APP_VERSION="5.2";
+const APP_VERSION="6.0";
 function uid(){return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())}
 const defaultData=[
 {id:uid(),name:"特定行為に関する検討委員会",type:"委員会",week:2,dow:2,time:"16:00",end:"",memo:"5月以降",monthPattern:"all",months:[]},
@@ -180,18 +213,29 @@ function escapeHtml(str){return String(str).replace(/[&<>"']/g,m=>({"&":"&amp;",
 function monthLabel(c){let p=c.monthPattern||"all";if(p==="all")return"毎月";if(p==="odd")return"奇数月";if(p==="even")return"偶数月";if(p==="custom")return(c.months||[]).join(",")+"月";return"毎月";}
 
 let currentEventFilter="all";
+
 function eventKind(e){
   const type=e.type||"";
   const role=e.role||"";
   const name=e.name||"";
+  const memo=e.memo||"";
+
   if(type==="私用") return "private";
+
   if(type==="研修"){
-    if(["担当","講師","ファシリテーター"].includes(role) || /担当|講師|ファシリテーター/.test(name+role)) return "training-own";
+    const text=name+role+memo;
+    if(["担当","講師","ファシリテーター"].includes(role) || /担当|講師|ファシリテーター/.test(text)){
+      return "training-own";
+    }
     return "training-attend";
   }
+
+  // 委員会・部会・会議は全部「会議」として扱う
   if(["委員会","部会","会議"].includes(type)) return "meeting";
+
   return "other";
 }
+
 function kindLabel(kind){
   return {
     "meeting":"会議",
@@ -201,6 +245,7 @@ function kindLabel(kind){
     "other":"その他"
   }[kind]||"その他";
 }
+
 function kindIcon(kind){
   return {
     "meeting":"🔵",
@@ -210,23 +255,24 @@ function kindIcon(kind){
     "other":"⚪"
   }[kind]||"⚪";
 }
+
 function setEventFilter(kind,btn){
   currentEventFilter=kind;
   document.querySelectorAll(".filterBar button").forEach(b=>b.classList.remove("activeFilter"));
   if(btn) btn.classList.add("activeFilter");
   renderHome();
 }
+
 function hasOverlapForEvent(e){
   if(!e.date || !e.time || !e.end) return false;
-  const dateStr=`${e.date.getFullYear()}-${String(e.date.getMonth()+1).padStart(2,"0")}-${String(e.date.getDate()).padStart(2,"0")}`;
-  const events=getMonthRows(e.date.getFullYear(),e.date.getMonth()+1);
-  return events.some(x=>{
-    if(x===e) return false;
-    const xDate=`${x.date.getFullYear()}-${String(x.date.getMonth()+1).padStart(2,"0")}-${String(x.date.getDate()).padStart(2,"0")}`;
-    if(xDate!==dateStr || !x.time || !x.end) return false;
+  const y=e.date.getFullYear(), m=e.date.getMonth()+1;
+  const sameDay=getMonthRows(y,m).filter(x=>x!==e && x.date && x.date.getFullYear()===y && x.date.getMonth()+1===m && x.date.getDate()===e.date.getDate());
+  return sameDay.some(x=>{
+    if(!x.time || !x.end) return false;
     return e.time < x.end && e.end > x.time;
   });
 }
+
 function eventCard(e){
   let role=e.role?` ${e.role}`:"";
   const kind=eventKind(e);
@@ -238,7 +284,7 @@ function eventCard(e){
   </div>`;
 }
 function taskCard(t){let done=t.status==="完了";return`<div class="task ${done?"done":""}"><b><span class="tag tag${t.priority}">${t.priority}</span>${escapeHtml(t.title)}</b><div class="meta">${escapeHtml(targetName(t.committeeId))} ${t.due?"/ 期限 "+t.due:""} / ${t.status}</div><div class="meta">${escapeHtml(t.memo||"")}</div><div class="actions"><button class="ghost" onclick="editTask('${t.id}')">編集</button><button class="ok" onclick="toggleTaskDone('${t.id}')">${done?"未完了へ":"完了"}</button><button class="danger" onclick="deleteTask('${t.id}')">削除</button></div></div>`}
-function renderAll(){renderSelectors();renderHome();renderRegular();renderSingle();renderTasks();renderMinutes();}
+function renderAll(){renderSelectors();renderHome();renderRegular();renderSingle();renderTasks();renderMinutes();renderCalendar();}
 function renderHome(){let now=new Date();let today=new Date(now.getFullYear(),now.getMonth(),now.getDate());let weekEnd=new Date(today);weekEnd.setDate(today.getDate()+6);todayList.innerHTML=getRangeRows(today,today).map(eventCard).join("")||"<div class='small'>予定なし</div>";weekList.innerHTML=getRangeRows(today,weekEnd).map(eventCard).join("")||"<div class='small'>予定なし</div>";let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m);let filteredRows=currentEventFilter==="all"?rows:rows.filter(e=>eventKind(e)===currentEventFilter);monthList.innerHTML=filteredRows.length?filteredRows.map(eventCard).join(""):"予定なし";renderWork();let open=tasks.filter(t=>t.status!=="完了");let soon=open.filter(t=>t.due&&(new Date(t.due+"T00:00:00")-today)/(86400000)<=7);let high=open.filter(t=>["S","A"].includes(t.priority));todoCount.textContent=open.length;dueSoonCount.textContent=soon.length;highCount.textContent=high.length;homeTasks.innerHTML=open.sort(sortTasks).slice(0,6).map(taskCard).join("")||"<div class='small'>未完了タスクなし</div>";}
 function sortTasks(a,b){let p={S:0,A:1,B:2,C:3};return(p[a.priority]-p[b.priority])||((a.due||"9999").localeCompare(b.due||"9999"))}
 function renderWork(){let y=Number(year.value),m=Number(month.value);let rows=getMonthRows(y,m).filter(x=>["委員会","部会","会議","研修"].includes(x.type));workList.innerHTML=rows.map(eventCard).join("")||"<div class='small'>候補なし</div>"}
@@ -413,6 +459,80 @@ function jumpToday(){let now=new Date();year.value=now.getFullYear();month.value
 function allTargets(){return [...committees.map(x=>({...x,targetType:"regular"})),...singles.map(x=>({...x,targetType:"single"}))]}
 function initMonthChecks(){customMonths.innerHTML="";for(let i=1;i<=12;i++){customMonths.innerHTML+=`<label><input class="mcheck" type="checkbox" value="${i}">${i}月</label>`}}
 function toggleCustomMonths(){customMonthsBox.style.display=monthPattern.value==="custom"?"block":"none"}
+
+function renderCalendar(){
+  const el=document.getElementById("calendarGrid");
+  if(!el) return;
+  const y=Number(year.value), m=Number(month.value);
+  const first=new Date(y,m-1,1);
+  const last=new Date(y,m,0);
+  const rows=getMonthRows(y,m);
+  let htmlCal="";
+  ["日","月","火","水","木","金","土"].forEach(d=>htmlCal+=`<div class="calHead">${d}</div>`);
+  for(let i=0;i<first.getDay();i++) htmlCal+=`<div></div>`;
+  for(let d=1;d<=last.getDate();d++){
+    const dayEvents=rows.filter(e=>e.date.getDate()===d);
+    htmlCal+=`<div class="calCell"><div class="calDate">${d}</div>`;
+    dayEvents.slice(0,3).forEach(e=>{
+      const k=eventKind(e);
+      htmlCal+=`<div class="calItem cal-${k}">${e.time||""} ${e.name}</div>`;
+    });
+    if(dayEvents.length>3) htmlCal+=`<div class="small">+${dayEvents.length-3}</div>`;
+    htmlCal+=`</div>`;
+  }
+  el.innerHTML=htmlCal;
+}
+
+function workSummaryText(){
+  const y=Number(year.value), m=Number(month.value);
+  const rows=getMonthRows(y,m).filter(x=>["委員会","部会","会議","研修"].includes(x.type));
+  const counts={meeting:0,"training-own":0,"training-attend":0,private:0,other:0};
+  rows.forEach(x=>counts[eventKind(x)]++);
+  const dates=[...new Set(rows.map(x=>`${x.date.getMonth()+1}/${x.date.getDate()}（${jpDow(x.date)}）`))];
+  return `${y}年${m}月 勤務希望集計
+対象日数：${dates.length}日
+会議：${counts.meeting}件
+研修（担当）：${counts["training-own"]}件
+研修（受講）：${counts["training-attend"]}件
+
+【勤務希望日】
+${dates.join("\n")}
+
+【詳細】
+${workRequestText()}`;
+}
+
+function copyWorkSummary(){
+  const text=workSummaryText();
+  navigator.clipboard.writeText(text).then(()=>alert("勤務希望集計をコピーしました")).catch(()=>alert(text));
+}
+
+function exportCSV(){
+  const y=Number(year.value), m=Number(month.value);
+  const rows=getMonthRows(y,m);
+  const header=["date","start","end","category","title","role","memo"];
+  const csv=[header.join(",")].concat(rows.map(e=>{
+    const date=`${e.date.getFullYear()}-${String(e.date.getMonth()+1).padStart(2,"0")}-${String(e.date.getDate()).padStart(2,"0")}`;
+    const category=kindLabel(eventKind(e));
+    return [date,e.time||"",e.end||"",category,e.name||"",e.role||"",e.memo||""].map(v=>`"${String(v).replaceAll('"','""')}"`).join(",");
+  })).join("\n");
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`natsumi_schedule_${y}_${String(m).padStart(2,"0")}.csv`;
+  a.click();
+}
+
+function exportICloudBackup(){
+  const data={committees,singles,tasks,minutes,exportedAt:new Date().toISOString(),version:APP_VERSION};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`natsumi_secretary_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  alert("保存先で iCloud Drive を選べば、iCloudバックアップとして使えます。");
+}
+
 function init(){initMonthChecks();let now=new Date();for(let yy=2026;yy<=2028;yy++)year.innerHTML+=`<option ${yy==now.getFullYear()?"selected":""}>${yy}</option>`;for(let mm=1;mm<=12;mm++)month.innerHTML+=`<option value="${mm}" ${mm==now.getMonth()+1?"selected":""}>${mm}月</option>`;mergeDefaults();persist();renderAll();if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
 init();
 </script>
