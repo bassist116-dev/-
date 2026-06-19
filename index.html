@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="夏海秘書">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
-<title>夏海秘書アプリ Ver6.1</title>
+<title>夏海秘書アプリ Ver6.2</title>
 <style>
 :root{--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--main:#2563eb;--line:#e2e8f0;--danger:#dc2626;--ok:#16a34a;--warn:#f59e0b;--dark:#0f172a}
 *{box-sizing:border-box}
@@ -79,7 +79,7 @@ main{
 
 
 /* Ver6 calendar/export */
-#calendarGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%}
+.calendarGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .calHead{font-size:12px;text-align:center;color:#64748b;font-weight:800;padding:4px 0}
 .calCell{min-height:82px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:5px;font-size:12px;overflow:hidden}
 .calDate{font-weight:900;margin-bottom:3px}
@@ -91,10 +91,69 @@ main{
 .cal-other{background:#f1f5f9;color:#475569}
 .summaryBox{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;margin-top:8px}
 
+
+/* Ver6.2 calendar readability */
+#calendarGrid{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:3px;
+  width:100%;
+}
+.calHead{
+  font-size:12px;
+  text-align:center;
+  color:#475569;
+  font-weight:900;
+  padding:4px 0;
+}
+.calCell{
+  min-height:86px;
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  padding:4px;
+  font-size:11px;
+  overflow:hidden;
+}
+.calDate{
+  font-weight:900;
+  font-size:14px;
+  line-height:1.1;
+  margin-bottom:3px;
+}
+.calItem{
+  border-radius:6px;
+  padding:2px 3px;
+  margin:2px 0;
+  font-size:10px;
+  line-height:1.15;
+  white-space:normal;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  word-break:break-all;
+}
+.calItem .calTime{
+  font-weight:900;
+  display:block;
+}
+.calItem .calTitle{
+  display:block;
+}
+@media(max-width:480px){
+  main{padding-left:8px!important;padding-right:8px!important}
+  .card{padding:10px!important;border-radius:16px}
+  #calendarGrid{gap:2px}
+  .calCell{min-height:74px;border-radius:9px;padding:3px}
+  .calDate{font-size:13px}
+  .calItem{font-size:9px;padding:2px;line-height:1.1}
+}
+
 </style>
 </head>
 <body>
-<header><h1>夏海秘書アプリ Ver6.1</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
+<header><h1>夏海秘書アプリ Ver6.2</h1><div class="sub">予定・委員会・研修・議事録・宿題・勤務希望</div></header>
 <main>
 <section id="home" class="view active">
  <div class="card"><h2>表示月</h2><div class="row"><select id="year"></select><select id="month"></select><button class="primary" onclick="renderAll()">更新</button><button class="ghost" onclick="jumpToday()">今月</button></div></div>
@@ -109,7 +168,7 @@ main{
 <button type="button" onclick="setEventFilter('training-attend',this)">研修受講</button>
 <button type="button" onclick="setEventFilter('private',this)">私用</button>
 </div><div id="monthList"></div></div>
- <div class="card"><h2>月カレンダー</h2><div id="calendarGrid" class="calendarGrid"></div></div>
+ <div class="card"><h2>月カレンダー</h2><div id="calendarGrid"></div></div>
  <div class="card"><h2>勤務希望候補</h2><div class="row"><button class="ok" onclick="copyWorkRequests()">勤務希望日をコピー</button><button class="ghost" onclick="renderWorkText()">テキスト表示</button><button class="ghost" onclick="copyWorkSummary()">勤務希望集計コピー</button></div><div id="workText"></div><div id="workList"></div></div>
 </section>
 
@@ -164,7 +223,7 @@ main{
 <nav class="tabs"><button class="active" onclick="showView('home',this)">予定</button><button onclick="showView('regular',this)">委員会</button><button onclick="showView('single',this)">研修</button><button onclick="showView('tasks',this)">宿題</button><button onclick="showView('minutes',this)">議事録</button><button onclick="showView('ocr',this)">取込</button></nav>
 
 <script>
-const APP_VERSION="6.1";
+const APP_VERSION="6.2";
 function uid(){return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())}
 const defaultData=[
 {id:uid(),name:"特定行為に関する検討委員会",type:"委員会",week:2,dow:2,time:"16:00",end:"",memo:"5月以降",monthPattern:"all",months:[]},
@@ -473,11 +532,11 @@ function renderCalendar(){
   for(let d=1;d<=last.getDate();d++){
     const dayEvents=rows.filter(e=>e.date.getDate()===d);
     htmlCal+=`<div class="calCell"><div class="calDate">${d}</div>`;
-    dayEvents.slice(0,3).forEach(e=>{
+    dayEvents.slice(0,2).forEach(e=>{
       const k=eventKind(e);
-      htmlCal+=`<div class="calItem cal-${k}">${e.time||""} ${e.name}</div>`;
+      htmlCal+=`<div class="calItem cal-${k}"><span class="calTime">${e.time||""}${e.end?"-"+e.end:""}</span><span class="calTitle">${escapeHtml(e.name||"")}</span></div>`;
     });
-    if(dayEvents.length>3) htmlCal+=`<div class="small">+${dayEvents.length-3}</div>`;
+    if(dayEvents.length>2) htmlCal+=`<div class="small">+${dayEvents.length-2}</div>`;
     htmlCal+=`</div>`;
   }
   el.innerHTML=htmlCal;
